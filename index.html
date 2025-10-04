@@ -1,1 +1,112 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <title>Neuralt nätverk för bevattning</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Neuralt nätverk för bevattning</h1>
 
+    <div id="network-container">
+      <!-- ---------- Indatalager ---------- -->
+      <div id="input-layer" class="layer">
+        <div class="input-node" id="input0">
+          <label
+            >Jordfuktighet (%)
+            <input type="number" id="moisture" value="30" step="1" />
+          </label>
+        </div>
+        <div class="input-node" id="input1">
+          <label
+            >Lufttemperatur (°C)
+            <input type="number" id="temperature" value="20" step="1" />
+          </label>
+        </div>
+      </div>
+
+      <!-- ---------- Dolt lager ---------- -->
+      <div id="hidden-layer" class="layer">
+        <div class="hidden-node" id="hidden0">
+          <div class="bias-label bias-hidden" id="bias-h0">b=-0.82</div>
+          <div class="node-part pre" id="pre-h0">?</div>
+          <div class="node-part relu">
+            <svg viewBox="0 0 40 40">
+              <path
+                d="M5 20H20L35 5"
+                stroke="#fff"
+                stroke-width="4"
+                fill="none"
+              />
+            </svg>
+          </div>
+          <div class="node-part post" id="post-h0">?</div>
+        </div>
+
+        <div class="hidden-node" id="hidden1">
+          <div class="bias-label bias-hidden" id="bias-h1">b=0.71</div>
+          <div class="node-part pre" id="pre-h1">?</div>
+          <div class="node-part relu">
+            <svg viewBox="0 0 40 40">
+              <path
+                d="M5 20H20L35 5"
+                stroke="#fff"
+                stroke-width="4"
+                fill="none"
+              />
+            </svg>
+          </div>
+          <div class="node-part post" id="post-h1">?</div>
+        </div>
+
+        <div class="hidden-node" id="hidden2">
+          <div class="bias-label bias-hidden" id="bias-h2">b=0.35</div>
+          <div class="node-part pre" id="pre-h2">?</div>
+          <div class="node-part relu">
+            <svg viewBox="0 0 40 40">
+              <path
+                d="M5 20H20L35 5"
+                stroke="#fff"
+                stroke-width="4"
+                fill="none"
+              />
+            </svg>
+          </div>
+          <div class="node-part post" id="post-h2">?</div>
+        </div>
+
+        <div class="controls">
+          <button id="calc-hidden">Beräkna lager</button>
+          <select id="show-ih">
+            <option value="none">ingen</option>
+            <option value="h0">Nod 1</option>
+            <option value="h1">Nod 2</option>
+            <option value="h2">Nod 3</option>
+            <option value="all">alla</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ---------- Outputlager ---------- -->
+      <div id="output-layer" class="layer">
+        <div class="output-node" id="output-node">
+          <div class="bias-label bias-output" id="bias-o">b=0.91</div>
+          <div id="output-prob">?</div>
+        </div>
+        <div id="prediction-text">Bevattning startas: ?</div>
+
+        <div class="controls">
+          <button id="calc-output">Beräkna nod</button>
+          <label style="display: flex; align-items: center; gap: 6px"
+            ><input type="checkbox" id="show-ho" /> Visa kopplingar</label
+          >
+        </div>
+      </div>
+
+      <!-- ---------- SVG för linjer ---------- -->
+      <svg id="connections" class="connections-svg"></svg>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
