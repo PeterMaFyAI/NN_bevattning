@@ -30,7 +30,6 @@ let currentHOVisible = false;
 
 /***** Utility-funktioner *****/
 const round2 = (x) => Math.round(x * 100) / 100;
-const logistic = (x) => 1 / (1 + Math.exp(-x));
 
 /* Returnera mitten på vänster/höger kant rel. container */
 function edgeMid(el, side) {
@@ -189,10 +188,9 @@ document.getElementById('calc-hidden').addEventListener('click', () => {
 
 document.getElementById('calc-output').addEventListener('click', () => {
   const net = hiddenOut.reduce((s, h, j) => s + h * W_HO[j], 0) + B_O;
-  const p = logistic(net);
-  outputProb.textContent = round2(p);
+  outputProb.textContent = round2(net);
   document.getElementById('prediction-text').textContent = `Bevattning startas: ${
-    p >= 0.5 ? 'ja' : 'nej'
+    net > 0 ? 'ja' : 'nej'
   }`;
 });
 
