@@ -154,6 +154,7 @@ const manualTrainingBtn = document.getElementById('manual-training-btn');
 const autoTrainBtn = document.getElementById('auto-train-btn');
 const epochsInput = document.getElementById('epochs-input');
 const batchInput = document.getElementById('batch-input');
+const animateTrainingCheckbox = document.getElementById('animate-training');
 const resetBtn = document.getElementById('reset-weights-btn');
 const toggleTrainingBtn = document.getElementById('toggle-training-table');
 const trainingTableContainer = document.getElementById('training-table-container');
@@ -176,6 +177,7 @@ let manualAnimating = false;
 let autoRunning = false;
 let storedIHSelection = 'none';
 let storedHOVisible = false;
+let autoAnimationEnabled = animateTrainingCheckbox.checked;
 
 /***** Utility-funktioner *****/
 const round2 = (x) => Math.round(x * 100) / 100;
@@ -261,6 +263,10 @@ function updateControlStates() {
   epochsInput.disabled = autoRunning;
   batchInput.disabled = autoRunning;
 }
+
+animateTrainingCheckbox.addEventListener('change', () => {
+  autoAnimationEnabled = animateTrainingCheckbox.checked;
+});
 
 function forwardPassCore(x, p = params) {
   const preHidden = [];
@@ -790,7 +796,9 @@ async function runAutoTraining() {
       updateWeightLabels();
       epochLossSum += grads.loss * grads.batchSize;
       sampleCount += grads.batchSize;
-      await wait(30);
+      if (autoAnimationEnabled) {
+        await wait(30);
+      }
     }
     const avgLoss = sampleCount ? epochLossSum / sampleCount : 0;
     autoStatus.textContent = `Epok ${epoch}/${epochs} klar – medelfel: ${round2(
