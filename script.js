@@ -41,6 +41,17 @@ function edgeMid(el, side) {
   return { x, y };
 }
 
+/***** Justera indatanoder *****/
+function alignInputNodes() {
+  if (!hiddenEls.length || inputEls.length < 2) return;
+  const topTarget = edgeMid(hiddenEls[0], 'left').y;
+  const bottomTarget = edgeMid(hiddenEls[hiddenEls.length - 1], 'left').y;
+  const currentTop = edgeMid(inputEls[0], 'right').y;
+  const currentBottom = edgeMid(inputEls[inputEls.length - 1], 'right').y;
+  inputEls[0].style.transform = `translateY(${topTarget - currentTop}px)`;
+  inputEls[1].style.transform = `translateY(${bottomTarget - currentBottom}px)`;
+}
+
 /***** Rita linje + etikett *****/
 function makeLine(x1, y1, x2, y2, label) {
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -199,6 +210,7 @@ document.getElementById('show-ho').addEventListener('change', (e) =>
 /***** Init *****/
 function refresh() {
   window.requestAnimationFrame(() => {
+    alignInputNodes();
     buildConnections();
     updateBiasLabels();
   });
