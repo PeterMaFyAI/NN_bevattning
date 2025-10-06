@@ -52,7 +52,7 @@ function alignInputNodes() {
 }
 
 /***** Rita linje + etikett *****/
-function makeLine(x1, y1, x2, y2, label) {
+function makeLine(x1, y1, x2, y2, label, options = {}) {
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   line.setAttribute('x1', x1);
   line.setAttribute('y1', y1);
@@ -63,10 +63,30 @@ function makeLine(x1, y1, x2, y2, label) {
   svg.appendChild(line);
 
   const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  text.setAttribute('x', (x1 + x2) / 2);
-  text.setAttribute('y', (y1 + y2) / 2 - 6);
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.hypot(dx, dy) || 1;
+  const {
+    labelRatio = 0.5,
+    verticalOffset = -6,
+    normalOffset = 0,
+    align = false
+  } = options;
+  const baseX = x1 + dx * labelRatio;
+  const baseY = y1 + dy * labelRatio;
+  const normalX = (-dy / length) * normalOffset;
+  const normalY = (dx / length) * normalOffset;
+  const textX = baseX + normalX;
+  const textY = baseY + normalY + verticalOffset;
+  text.setAttribute('x', textX);
+  text.setAttribute('y', textY);
   text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('dominant-baseline', 'middle');
   text.setAttribute('font-size', '0.85em');
+  if (align) {
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    text.setAttribute('transform', `rotate(${angle}, ${textX}, ${textY})`);
+  }
   text.textContent = label;
   svg.appendChild(text);
   return { line, text };
@@ -94,7 +114,13 @@ function buildConnections() {
           inpR[i].y,
           hidL[j].x,
           hidL[j].y,
-          W_IH[i][j].toFixed(2)
+          W_IH[i][j].toFixed(2),
+          {
+            labelRatio: 0.2,
+            verticalOffset: 0,
+            normalOffset: 12,
+            align: true
+          }
         )
       );
     }
