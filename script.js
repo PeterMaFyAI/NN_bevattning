@@ -19,6 +19,8 @@ const hiddenEls = [
   document.getElementById('hidden1'),
   document.getElementById('hidden2')
 ];
+const hiddenBiasEls = hiddenEls.map((el) => el.querySelector('.bias-label'));
+const outputBiasEl = document.getElementById('bias-o');
 const outputEl = document.getElementById('output-node');
 const outputProb = document.getElementById('output-prob');
 const hiddenLayerEl = document.getElementById('hidden-layer');
@@ -100,6 +102,13 @@ function buildConnections() {
   }
   hideIH();
   hideHO();
+}
+
+function updateBiasLabels() {
+  hiddenBiasEls.forEach((el, idx) => {
+    el.textContent = `b=${B_H[idx].toFixed(2)}`;
+  });
+  outputBiasEl.textContent = `b=${B_O.toFixed(2)}`;
 }
 
 /***** Visa/dölj in→hidden *****/
@@ -192,6 +201,7 @@ document.getElementById('show-ho').addEventListener('change', (e) =>
 function refresh() {
   alignLayers();
   buildConnections();
+  updateBiasLabels();
 }
 
 window.addEventListener('load', refresh);
