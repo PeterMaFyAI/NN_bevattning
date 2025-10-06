@@ -11,6 +11,10 @@ body {
   padding: 20px;
 }
 
+.hidden {
+  display: none !important;
+}
+
 h1 {
   text-align: center;
   margin-top: 0;
@@ -60,6 +64,21 @@ h1 {
   justify-content: center;
   gap: 34px;
   height: 100%;
+}
+
+.manual-controls {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.manual-controls #manual-example-info {
+  font-size: 0.9em;
+  color: #2c3e50;
+  min-height: 20px;
 }
 
 #input-layer .node-stack {
@@ -157,6 +176,12 @@ h1 {
   position: relative;
 }
 
+.output-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* ---------- Biasetiketter ---------- */
 .bias-label {
   font-size: 0.85em;
@@ -201,6 +226,22 @@ button:hover {
   background: #2980b9;
 }
 
+.accent-button {
+  background: #27ae60;
+}
+
+.accent-button:hover {
+  background: #1e874b;
+}
+
+.secondary {
+  background: #95a5a6;
+}
+
+.secondary:hover {
+  background: #7f8c8d;
+}
+
 select,
 input[type="checkbox"] {
   padding: 6px 8px;
@@ -213,4 +254,178 @@ input[type="checkbox"] {
   margin-top: 10px;
   font-weight: 700;
   font-size: 1.1em;
+}
+
+#manual-feedback {
+  min-height: 24px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.result-correct {
+  color: #1e8449;
+}
+
+.result-wrong {
+  color: #c0392b;
+}
+
+/* ---------- Träningsområde ---------- */
+#training-area {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+#training-area h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.training-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.auto-training-controls {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.auto-training-controls label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  gap: 6px;
+  color: #2c3e50;
+}
+
+.auto-training-controls input {
+  width: 120px;
+  padding: 6px 8px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 1em;
+}
+
+.status-text {
+  text-align: center;
+  color: #2c3e50;
+  min-height: 24px;
+}
+
+.table-container {
+  margin-top: 20px;
+  background: #fbfcfe;
+  border: 1px solid #dde3ec;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.table-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 360px;
+}
+
+table.data-table th,
+table.data-table td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid #ecf0f1;
+  font-size: 0.95em;
+}
+
+table.data-table th {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(120deg, #2ecc71, #27ae60);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+table.data-table tbody tr:nth-child(odd) {
+  background: #f8fbff;
+}
+
+table.data-table tbody tr:hover {
+  background: #edf5ff;
+}
+
+.test-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- Animationer ---------- */
+.pulse {
+  animation: pulseGlow 0.8s ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(46, 204, 113, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(46, 204, 113, 0);
+  }
+}
+
+.update-flash {
+  animation: updateGlow 0.8s ease-in-out;
+}
+
+@keyframes updateGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(243, 156, 18, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(243, 156, 18, 0);
+  }
+}
+
+.svg-forward {
+  stroke: #27ae60 !important;
+  stroke-width: 3 !important;
+}
+
+.svg-forward-text {
+  fill: #27ae60 !important;
+  font-weight: 700;
+}
+
+.svg-update {
+  stroke: #f39c12 !important;
+  stroke-width: 3 !important;
+}
+
+.svg-update-text {
+  fill: #f39c12 !important;
+  font-weight: 700;
 }
