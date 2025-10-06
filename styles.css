@@ -17,19 +17,11 @@ h1 {
 }
 
 /* ---------- Lagerlayout ---------- */
-#layer-titles {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 180px;
-  margin: 24px auto 0;
-  max-width: 1500px;
-}
-
 .layer-title {
   font-size: 1.1em;
   font-weight: 700;
   text-align: center;
+  margin: 0 0 18px;
 }
 
 #network-container {
