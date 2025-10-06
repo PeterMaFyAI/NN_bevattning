@@ -23,10 +23,10 @@ const hiddenBiasEls = hiddenEls.map((el) => el.querySelector('.bias-label'));
 const outputBiasEl = document.getElementById('bias-o');
 const outputEl = document.getElementById('output-node');
 const outputProb = document.getElementById('output-prob');
-const hiddenLayerEl = document.getElementById('hidden-layer');
-const outputLayerEl = document.getElementById('output-layer');
 const ihLines = [];
 const hoLines = [];
+let currentIHSelection = 'none';
+let currentHOVisible = false;
 
 /***** Utility-funktioner *****/
 const round2 = (x) => Math.round(x * 100) / 100;
@@ -62,19 +62,13 @@ function makeLine(x1, y1, x2, y2, label) {
   return { line, text };
 }
 
-/***** Centrera lager vertikalt *****/
-function alignLayers() {
-  const y0 = edgeMid(inputEls[0], 'right').y;
-  const y1 = edgeMid(inputEls[1], 'right').y;
-  const target = (y0 + y1) / 2;
-  const hiddenMid = edgeMid(hiddenEls[1], 'left').y;
-  const outMid = edgeMid(outputEl, 'left').y;
-  hiddenLayerEl.style.transform = `translateY(${target - hiddenMid}px)`;
-  outputLayerEl.style.transform = `translateY(${target - outMid}px)`;
-}
-
 /***** Bygg alla kopplingar *****/
 function buildConnections() {
+  const { width, height } = container.getBoundingClientRect();
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
   svg.innerHTML = '';
   ihLines.length = 0;
   hoLines.length = 0;
@@ -100,8 +94,8 @@ function buildConnections() {
       makeLine(hidR[j].x, hidR[j].y, outL.x, outL.y, W_HO[j].toFixed(2))
     );
   }
-  hideIH();
-  hideHO();
+  showIH(currentIHSelection);
+  toggleHO(currentHOVisible);
 }
 
 function updateBiasLabels() {
@@ -121,6 +115,7 @@ function hideIH() {
 }
 
 function showIH(opt) {
+  currentIHSelection = opt;
   hideIH();
   if (opt === 'none') return;
   if (opt === 'all') {
@@ -153,6 +148,7 @@ function hideHO() {
 }
 
 function toggleHO(show) {
+  currentHOVisible = show;
   if (show) {
     hoLines.forEach((o) => {
       o.line.style.display = 'block';
@@ -191,7 +187,10 @@ document.getElementById('calc-output').addEventListener('click', () => {
 
 /***** UI-kopplingar *****/
 document.getElementById('show-ih').addEventListener('change', (e) =>
-  showIH(e.target.value)
+  {
+    currentIHSelection = e.target.value;
+    showIH(currentIHSelection);
+  }
 );
 document.getElementById('show-ho').addEventListener('change', (e) =>
   toggleHO(e.target.checked)
@@ -199,9 +198,10 @@ document.getElementById('show-ho').addEventListener('change', (e) =>
 
 /***** Init *****/
 function refresh() {
-  alignLayers();
-  buildConnections();
-  updateBiasLabels();
+  window.requestAnimationFrame(() => {
+    buildConnections();
+    updateBiasLabels();
+  });
 }
 
 window.addEventListener('load', refresh);
