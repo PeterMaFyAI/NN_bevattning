@@ -92,6 +92,38 @@ const testData = [
 const LABEL_TO_TARGET = { ja: 1, nej: -1 };
 const LABEL_FROM_OUTPUT = (out) => (out > 0 ? 'ja' : 'nej');
 
+const NORMALIZATION_STATS = (() => {
+  const mean = (arr) => arr.reduce((sum, val) => sum + val, 0) / arr.length;
+  const variance = (arr, mu) =>
+    arr.reduce((sum, val) => sum + (val - mu) * (val - mu), 0) / arr.length;
+  const moistureValues = trainingData.map((example) => example.moisture);
+  const temperatureValues = trainingData.map((example) => example.temperature);
+  const moistureMean = mean(moistureValues);
+  const temperatureMean = mean(temperatureValues);
+  const moistureStd = Math.sqrt(variance(moistureValues, moistureMean)) || 1;
+  const temperatureStd =
+    Math.sqrt(variance(temperatureValues, temperatureMean)) || 1;
+  return {
+    moistureMean,
+    moistureStd,
+    temperatureMean,
+    temperatureStd
+  };
+})();
+
+function normalizeInputs([moisture, temperature]) {
+  const {
+    moistureMean,
+    moistureStd,
+    temperatureMean,
+    temperatureStd
+  } = NORMALIZATION_STATS;
+  return [
+    (moisture - moistureMean) / moistureStd,
+    (temperature - temperatureMean) / temperatureStd
+  ];
+}
+
 /***** Elementreferenser *****/
 const svg = document.getElementById('connections');
 const container = document.getElementById('network-container');
@@ -230,7 +262,7 @@ function updateControlStates() {
   batchInput.disabled = autoRunning;
 }
 
-function forwardPass(x, p = params) {
+function forwardPassCore(x, p = params) {
   const preHidden = [];
   const actHidden = [];
   for (let j = 0; j < 3; j += 1) {
@@ -240,6 +272,17 @@ function forwardPass(x, p = params) {
   }
   const output = actHidden.reduce((sum, h, j) => sum + h * p.W_HO[j], p.B_O);
   return { preHidden, actHidden, output };
+}
+
+function forwardPassModel(rawX, p = params) {
+  const modelInputs = normalizeInputs(rawX);
+  const forward = forwardPassCore(modelInputs, p);
+  return { ...forward, modelInputs, rawInputs: rawX };
+}
+
+function forwardPassDisplay(rawX, p = params) {
+  const forward = forwardPassCore(rawX, p);
+  return { ...forward, modelInputs: rawX, rawInputs: rawX };
 }
 
 function computeGradients(forward, x, target, p = params) {
@@ -275,10 +318,10 @@ function computeBatchGradients(batch) {
   };
   if (batch.length === 0) return grads;
   batch.forEach((example) => {
-    const x = [example.moisture, example.temperature];
-    const forward = forwardPass(x);
+    const rawX = [example.moisture, example.temperature];
+    const forward = forwardPassModel(rawX, params);
     const target = LABEL_TO_TARGET[example.label];
-    const localGrads = computeGradients(forward, x, target);
+    const localGrads = computeGradients(forward, forward.modelInputs, target, params);
     grads.B_O += localGrads.B_O;
     grads.lossSum += localGrads.loss;
     for (let j = 0; j < 3; j += 1) {
@@ -587,8 +630,9 @@ async function runManualForward(example) {
   await wait(500);
 
   const x = [example.moisture, example.temperature];
-  const forward = forwardPass(x);
-  hiddenOut = forward.actHidden.slice();
+  const displayForward = forwardPassDisplay(x);
+  const modelForward = forwardPassModel(x);
+  hiddenOut = displayForward.actHidden.slice();
 
   resetHiddenDisplays();
 
@@ -598,7 +642,7 @@ async function runManualForward(example) {
     ihLines
       .filter((line) => line.to === j)
       .forEach((line) => highlightLine(line, 'svg-forward', 'svg-forward-text'));
-    setHiddenCell(j, forward.preHidden[j], forward.actHidden[j]);
+    setHiddenCell(j, displayForward.preHidden[j], displayForward.actHidden[j]);
     await wait(450);
   }
 
@@ -608,10 +652,10 @@ async function runManualForward(example) {
   hoLines.forEach((line) =>
     highlightLine(line, 'svg-forward', 'svg-forward-text')
   );
-  updatePrediction(forward.output);
+  updatePrediction(modelForward.output);
   await wait(350);
 
-  const predicted = LABEL_FROM_OUTPUT(forward.output);
+  const predicted = LABEL_FROM_OUTPUT(modelForward.output);
   const target = example.label;
   manualFeedback.textContent =
     predicted === target
@@ -620,7 +664,10 @@ async function runManualForward(example) {
   manualFeedback.classList.add(
     predicted === target ? 'result-correct' : 'result-wrong'
   );
-  manualForwardCache = { ...forward, inputs: x, example };
+  manualForwardCache = {
+    forward: modelForward,
+    example
+  };
   manualActiveExample = example;
   updateManualStatus('Klicka på "Bakåtpropagering" för att uppdatera vikterna.');
   backpropBtn.classList.remove('hidden');
@@ -654,8 +701,8 @@ async function handleBackprop() {
 
   const snapshot = cloneParams(params);
   const grads = computeGradients(
-    manualForwardCache,
-    manualForwardCache.inputs,
+    manualForwardCache.forward,
+    manualForwardCache.forward.modelInputs,
     LABEL_TO_TARGET[manualForwardCache.example.label],
     snapshot
   );
@@ -691,8 +738,10 @@ async function handleBackprop() {
   }
 
   manualFeedback.textContent += ` (fel=${round2(
-    Math.abs(manualForwardCache.output -
-      LABEL_TO_TARGET[manualForwardCache.example.label])
+    Math.abs(
+      manualForwardCache.forward.output -
+        LABEL_TO_TARGET[manualForwardCache.example.label]
+    )
   )})`;
   manualForwardCache = null;
   manualActiveExample = null;
@@ -760,7 +809,7 @@ function evaluateTestSet() {
   let totalError = 0;
   let correct = 0;
   testData.forEach((example) => {
-    const forward = forwardPass([example.moisture, example.temperature]);
+    const forward = forwardPassModel([example.moisture, example.temperature]);
     const target = LABEL_TO_TARGET[example.label];
     const error = forward.output - target;
     totalError += error * error;
@@ -797,21 +846,22 @@ function resetNetwork() {
 /***** Event listeners *****/
 document.getElementById('calc-hidden').addEventListener('click', () => {
   const x = getInputs();
-  const forward = forwardPass(x);
-  hiddenOut = forward.actHidden.slice();
-  forward.preHidden.forEach((pre, idx) => {
-    setHiddenCell(idx, pre, forward.actHidden[idx]);
+  const displayForward = forwardPassDisplay(x);
+  hiddenOut = displayForward.actHidden.slice();
+  displayForward.preHidden.forEach((pre, idx) => {
+    setHiddenCell(idx, pre, displayForward.actHidden[idx]);
   });
 });
 
 document.getElementById('calc-output').addEventListener('click', () => {
   const x = getInputs();
-  const forward = forwardPass(x);
-  hiddenOut = forward.actHidden.slice();
-  forward.preHidden.forEach((pre, idx) => {
-    setHiddenCell(idx, pre, forward.actHidden[idx]);
+  const displayForward = forwardPassDisplay(x);
+  hiddenOut = displayForward.actHidden.slice();
+  displayForward.preHidden.forEach((pre, idx) => {
+    setHiddenCell(idx, pre, displayForward.actHidden[idx]);
   });
-  updatePrediction(forward.output);
+  const modelForward = forwardPassModel(x);
+  updatePrediction(modelForward.output);
 });
 
 showIHSelect.addEventListener('change', (e) => {
