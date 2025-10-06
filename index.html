@@ -8,15 +8,10 @@
   <body>
     <h1>Neuralt nätverk för bevattning</h1>
 
-    <div id="layer-titles">
-      <h2 class="layer-title">Input lager</h2>
-      <h2 class="layer-title">Dolt lager</h2>
-      <h2 class="layer-title">Output lager</h2>
-    </div>
-
     <div id="network-container">
       <!-- ---------- Indatalager ---------- -->
       <div id="input-layer" class="layer">
+        <h2 class="layer-title">Inmatningslager</h2>
         <div class="node-stack">
           <div class="input-node" id="input0">
             <label
@@ -35,6 +30,7 @@
 
       <!-- ---------- Dolt lager ---------- -->
       <div id="hidden-layer" class="layer">
+        <h2 class="layer-title">Dolt lager</h2>
         <div class="node-stack">
           <div class="hidden-node" id="hidden0">
             <div class="bias-label bias-hidden" id="bias-h0">b=-0.82</div>
@@ -99,6 +95,7 @@
 
       <!-- ---------- Outputlager ---------- -->
       <div id="output-layer" class="layer">
+        <h2 class="layer-title">Utmatningslager</h2>
         <div class="node-stack">
           <div class="output-node" id="output-node">
             <div class="bias-label bias-output" id="bias-o">b=0.91</div>
