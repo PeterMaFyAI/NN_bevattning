@@ -118,7 +118,7 @@ function buildConnections() {
           {
             labelRatio: 0.2,
             verticalOffset: 0,
-            normalOffset: 12,
+            normalOffset: -12,
             align: true
           }
         )
@@ -127,7 +127,16 @@ function buildConnections() {
   }
   for (let j = 0; j < 3; j += 1) {
     hoLines.push(
-      makeLine(hidR[j].x, hidR[j].y, outL.x, outL.y, W_HO[j].toFixed(2))
+      makeLine(
+        hidR[j].x,
+        hidR[j].y,
+        outL.x,
+        outL.y,
+        W_HO[j].toFixed(2),
+        {
+          normalOffset: -10
+        }
+      )
     );
   }
   showIH(currentIHSelection);
