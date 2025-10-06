@@ -134,7 +134,10 @@ function buildConnections() {
         outL.y,
         W_HO[j].toFixed(2),
         {
-          normalOffset: -10
+          labelRatio: 2 / 3,
+          verticalOffset: -2,
+          normalOffset: -6,
+          align: true
         }
       )
     );
