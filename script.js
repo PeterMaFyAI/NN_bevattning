@@ -116,9 +116,9 @@ function buildConnections() {
           hidL[j].y,
           W_IH[i][j].toFixed(2),
           {
-            labelRatio: 0.2,
-            verticalOffset: 0,
-            normalOffset: -12,
+            labelRatio: 1 / 3,
+            verticalOffset: -2,
+            normalOffset: -6,
             align: true
           }
         )
