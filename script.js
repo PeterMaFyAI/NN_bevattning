@@ -1,11 +1,11 @@
 /***** Modellparametrar (2 decimaler) *****/
 const W_IH = [
-  [-0.12, 0.89, 0.64],
-  [0.36, -0.85, -0.62]
+  [0.63, -0.92, 0.47],
+  [-0.58, 0.31, -0.79]
 ];
-const B_H = [-0.82, 0.71, 0.35];
-const W_HO = [0.67, -1.08, 1.3];
-const B_O = 0.91;
+const B_H = [0.28, -0.41, 0.22];
+const W_HO = [1.17, -0.54, 0.83];
+const B_O = -0.46;
 
 /***** Elementreferenser *****/
 const svg = document.getElementById('connections');
