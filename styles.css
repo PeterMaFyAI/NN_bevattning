@@ -72,8 +72,18 @@ h1 {
   padding: 0 24px 10px;
 }
 
+
 .manual-controls {
   width: 100%;
+}
+
+.manual-controls.manual-inactive .manual-only {
+  display: none;
+}
+
+.manual-controls.manual-inactive .manual-grid {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
 }
 
 .manual-grid {
@@ -370,11 +380,24 @@ input[type="checkbox"] {
 
 .training-actions {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.training-row {
+  display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  justify-content: flex-start;
-  margin-bottom: 12px;
   align-items: center;
+}
+
+.training-row.primary-actions {
+  justify-content: flex-start;
+}
+
+.training-row.secondary-actions {
+  justify-content: flex-start;
 }
 
 .epochs-control {
@@ -405,6 +428,14 @@ input[type="checkbox"] {
   text-align: center;
   color: #2c3e50;
   min-height: 24px;
+}
+
+.button-muted {
+  opacity: 0.55;
+}
+
+.button-muted:hover {
+  opacity: 0.55;
 }
 
 .data-sections {

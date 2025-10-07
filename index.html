@@ -122,9 +122,9 @@
     </div>
 
     <section id="manual-training-panel">
-      <div id="manual-controls" class="manual-controls hidden">
+      <div id="manual-controls" class="manual-controls manual-inactive">
         <div class="manual-grid">
-          <div class="manual-cell manual-left">
+          <div class="manual-cell manual-left manual-only">
             <button id="load-next-example" class="manual-btn manual-btn-next">
               Ladda nästa exempel
             </button>
@@ -133,7 +133,7 @@
           <div class="manual-cell manual-center">
             <div id="manual-status" class="status-text"></div>
           </div>
-          <div class="manual-cell manual-right">
+          <div class="manual-cell manual-right manual-only">
             <button id="backprop-btn" class="manual-btn manual-btn-backprop">
               Bakåtpropagering
             </button>
@@ -147,20 +147,24 @@
       <h2>Träningsområde</h2>
 
       <div class="training-actions">
-        <button id="manual-training-btn">Manuell träning</button>
-        <button id="auto-train-btn">Automatisk träning</button>
-        <label class="epochs-control" for="epochs-input">
-          Epoker
-          <input type="number" id="epochs-input" min="1" value="200" />
-        </label>
-        <label class="animation-toggle">
-          <input type="checkbox" id="animate-training" checked />
-          <span>Visa animationer</span>
-        </label>
-        <button id="reset-weights-btn" class="danger-button">
-          <span class="icon">⟲</span>
-          <span>Återställ nätverket</span>
-        </button>
+        <div class="training-row primary-actions">
+          <button id="manual-training-btn">Manuell träning</button>
+          <button id="reset-weights-btn" class="danger-button">
+            <span class="icon">⟲</span>
+            <span>Återställ nätverket</span>
+          </button>
+        </div>
+        <div class="training-row secondary-actions">
+          <button id="auto-train-btn">Automatisk träning</button>
+          <label class="epochs-control" for="epochs-input">
+            Epoker
+            <input type="number" id="epochs-input" min="1" value="200" />
+          </label>
+          <label class="animation-toggle">
+            <input type="checkbox" id="animate-training" checked />
+            <span>Visa animationer</span>
+          </label>
+        </div>
       </div>
 
       <div class="data-sections">
@@ -182,7 +186,6 @@
         </div>
       </div>
 
-      <div id="auto-status" class="status-text"></div>
     </section>
 
     <script src="script.js"></script>
