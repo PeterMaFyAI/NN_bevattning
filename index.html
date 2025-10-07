@@ -27,12 +27,6 @@
           </div>
         </div>
 
-        <div id="manual-controls" class="manual-controls hidden">
-          <button id="load-next-example" class="accent-button">
-            Ladda nästa exempel
-          </button>
-          <div id="manual-example-info"></div>
-        </div>
       </div>
 
       <!-- ---------- Dolt lager ---------- -->
@@ -110,13 +104,9 @@
               <div class="bias-label bias-output" id="bias-o">?</div>
               <div id="output-prob">?</div>
             </div>
-            <button id="backprop-btn" class="secondary hidden">
-              Bakåtpropagering
-            </button>
           </div>
         </div>
         <div id="prediction-text">Bevattning startas: ?</div>
-        <div id="manual-feedback"></div>
 
         <div class="controls">
           <button id="calc-output">Beräkna nod</button>
@@ -129,6 +119,23 @@
       <!-- ---------- SVG för linjer ---------- -->
       <svg id="connections" class="connections-svg"></svg>
     </div>
+
+    <section id="manual-training-panel">
+      <div id="manual-controls" class="manual-controls hidden">
+        <div class="manual-controls-buttons">
+          <button id="load-next-example" class="accent-button">
+            Ladda nästa exempel
+          </button>
+          <button id="backprop-btn" class="secondary hidden">
+            Bakåtpropagering
+          </button>
+        </div>
+        <div class="manual-controls-info">
+          <div id="manual-example-info"></div>
+          <div id="manual-feedback"></div>
+        </div>
+      </div>
+    </section>
 
     <section id="training-area">
       <h2>Träningsområde</h2>
