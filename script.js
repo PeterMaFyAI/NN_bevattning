@@ -563,31 +563,30 @@ function positionCalculationOverlays() {
   if (!container) return;
   const containerRect = container.getBoundingClientRect();
   const bottomHiddenNode = hiddenEls[hiddenEls.length - 1];
-  const bottomInputNode = inputEls[inputEls.length - 1];
   const offsetY = 12;
-  if (bottomHiddenNode && outputCalcOverlay) {
+  let overlayTop = null;
+  if (bottomHiddenNode) {
     const rect = bottomHiddenNode.getBoundingClientRect();
-    const left = rect.right - containerRect.left + 18;
-    const top = rect.bottom - containerRect.top + offsetY;
-    outputCalcOverlay.style.left = `${left}px`;
-    outputCalcOverlay.style.top = `${top}px`;
+    overlayTop = rect.bottom - containerRect.top + offsetY;
+    if (outputCalcOverlay) {
+      const left = rect.right - containerRect.left + 18;
+      outputCalcOverlay.style.left = `${left}px`;
+      outputCalcOverlay.style.top = `${overlayTop}px`;
+    }
   }
   if (hiddenCalcOverlay) {
-    const selectedHiddenIdx = ['h0', 'h1', 'h2'].includes(currentIHSelection)
-      ? Number(currentIHSelection.slice(1))
-      : null;
-    const targetNode =
-      selectedHiddenIdx !== null ? hiddenEls[selectedHiddenIdx] : bottomInputNode;
-    if (targetNode) {
-      const rect = targetNode.getBoundingClientRect();
-      const left = rect.right - containerRect.left + 18;
-      const overlayHeight = hiddenCalcOverlay.offsetHeight || 0;
-      let top = rect.top - containerRect.top + (rect.height - overlayHeight) / 2;
-      if (!Number.isFinite(top)) {
-        top = rect.bottom - containerRect.top + offsetY;
-      }
-      hiddenCalcOverlay.style.left = `${left}px`;
-      hiddenCalcOverlay.style.top = `${top}px`;
+    const inputRight = Math.max(
+      ...inputEls.map((el) => el.getBoundingClientRect().right)
+    );
+    const hiddenLeft = Math.min(
+      ...hiddenEls.map((el) => el.getBoundingClientRect().left)
+    );
+    const centerX = (inputRight + hiddenLeft) / 2;
+    const overlayWidth = hiddenCalcOverlay.offsetWidth || 0;
+    const left = centerX - overlayWidth / 2 - containerRect.left;
+    hiddenCalcOverlay.style.left = `${left}px`;
+    if (overlayTop !== null) {
+      hiddenCalcOverlay.style.top = `${overlayTop}px`;
     }
   }
 }
