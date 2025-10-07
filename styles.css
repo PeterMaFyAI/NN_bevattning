@@ -401,18 +401,35 @@ input[type="checkbox"] {
   color: #2c3e50;
 }
 
-.data-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: flex-start;
-  margin-bottom: 16px;
-}
-
 .status-text {
   text-align: center;
   color: #2c3e50;
   min-height: 24px;
+}
+
+.data-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.data-section {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.data-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.data-status {
+  text-align: left;
 }
 
 .table-container {
