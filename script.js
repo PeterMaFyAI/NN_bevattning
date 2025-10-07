@@ -683,7 +683,6 @@ function createTableMarkup(data, title) {
     .map(
       (row) => `
         <tr>
-          <td>${row.id}</td>
           <td>${row.moisture}</td>
           <td>${row.temperature}</td>
           <td>${row.label}</td>
@@ -696,9 +695,8 @@ function createTableMarkup(data, title) {
       <table class="data-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Jordfuktighet (%)</th>
-            <th>Lufttemperatur (°C)</th>
+            <th>Jord<br />fukt (%)</th>
+            <th>Luft<br />temp (°C)</th>
             <th>Bevattna?</th>
           </tr>
         </thead>
