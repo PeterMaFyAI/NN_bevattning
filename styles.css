@@ -261,6 +261,51 @@ h1 {
   margin-top: 22px;
 }
 
+.calculation-output {
+  min-height: 22px;
+  font-size: 0.9em;
+  line-height: 1.5;
+  text-align: center;
+  color: #2c3e50;
+  max-width: 260px;
+}
+
+.calculation-output.calc-hidden {
+  display: none;
+}
+
+.calc-value {
+  font-weight: 700;
+}
+
+.calc-weight {
+  color: #7f8c8d;
+}
+
+.calc-input {
+  color: #27ae60;
+}
+
+.calc-bias-hidden {
+  color: #1e6fa1;
+}
+
+.calc-bias-output {
+  color: #c0392b;
+}
+
+.calc-hidden-node {
+  color: #1e6fa1;
+}
+
+.calc-result-hidden {
+  color: #aed6f1;
+}
+
+.calc-result-output {
+  color: #f5b7b1;
+}
+
 button {
   padding: 9px 16px;
   border: none;
