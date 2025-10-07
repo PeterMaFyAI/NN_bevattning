@@ -145,37 +145,33 @@
       <h2>Träningsområde</h2>
 
       <div class="training-actions">
-        <button id="toggle-training-table">Visa träningsdata</button>
         <button id="manual-training-btn">Manuell träning</button>
-        <div class="auto-training-controls">
-          <label for="epochs-input">
-            Epoker
-            <input type="number" id="epochs-input" min="1" value="50" />
-          </label>
-          <label for="batch-input">
-            Batch-storlek
-            <input type="number" id="batch-input" min="1" value="10" />
-          </label>
-          <label class="output-wrapper">
-            <input type="checkbox" id="animate-training" checked />
-            <span>Visa animationer</span>
-          </label>
-          <button id="auto-train-btn">Automatisk träning</button>
-        </div>
-        <button id="reset-weights-btn" class="secondary">
-          Återställ nätverket
+        <button id="auto-train-btn">Automatisk träning</button>
+        <label class="epochs-control" for="epochs-input">
+          Epoker
+          <input type="number" id="epochs-input" min="1" value="200" />
+        </label>
+        <label class="animation-toggle">
+          <input type="checkbox" id="animate-training" checked />
+          <span>Visa animationer</span>
+        </label>
+        <button id="reset-weights-btn" class="danger-button">
+          <span class="icon">⟲</span>
+          <span>Återställ nätverket</span>
         </button>
+      </div>
+
+      <div class="data-actions">
+        <button id="toggle-training-table">Visa träningsdata</button>
+        <button id="evaluate-training-btn">Utvärdera på träningsdata</button>
+        <button id="toggle-test-table">Visa testdata</button>
+        <button id="evaluate-test-btn">Utvärdera på testdata</button>
       </div>
 
       <div id="manual-status" class="status-text"></div>
       <div id="auto-status" class="status-text"></div>
 
       <div id="training-table-container" class="table-container hidden"></div>
-
-      <div class="test-actions">
-        <button id="toggle-test-table">Visa testdata</button>
-        <button id="evaluate-test-btn">Utvärdera på testdata</button>
-      </div>
       <div id="evaluation-result" class="status-text"></div>
       <div id="test-table-container" class="table-container hidden"></div>
     </section>
