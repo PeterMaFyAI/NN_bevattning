@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="dropGradient" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#6ecbff" />
+      <stop offset="100%" stop-color="#0077c8" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M32 4c10 13 18 23 18 33a18 18 0 1 1-36 0C14 27 22 17 32 4z"
+    fill="url(#dropGradient)"
+    stroke="#005d99"
+    stroke-width="2"
+  />
+  <path
+    d="M23 34c0-4 3-7 7-7s7 3 7 7-3 7-7 7"
+    fill="none"
+    stroke="#cceeff"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+</svg>
