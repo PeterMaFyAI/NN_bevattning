@@ -32,7 +32,7 @@
 
         <!-- ---------- Dolt lager ---------- -->
         <div id="hidden-layer" class="layer">
-          <h2 class="layer-title">Dolt lager</h2>
+          <h2 class="layer-title">Det dolda lagret</h2>
           <div class="node-stack">
             <div class="hidden-node" id="hidden0">
               <div class="bias-label bias-hidden" id="bias-h0">?</div>
@@ -86,7 +86,7 @@
 
         <!-- ---------- Outputlager ---------- -->
         <div id="output-layer" class="layer">
-          <h2 class="layer-title">Utmatningslager</h2>
+          <h2 class="layer-title">Utmatningslagret</h2>
           <p class="layer-info">Bevattningen startas om värdet är positivt (&gt;0)</p>
           <div class="node-stack">
             <div class="output-wrapper">
@@ -104,7 +104,30 @@
       </div>
     </section>
 
+    <section id="manual-training-panel">
+      <div id="manual-controls" class="manual-controls manual-inactive">
+        <div class="manual-grid">
+          <div class="manual-cell manual-left manual-only">
+            <button id="load-next-example" class="manual-btn manual-btn-next">
+              Ladda nästa exempel
+            </button>
+            <div id="manual-example-info"></div>
+          </div>
+          <div class="manual-cell manual-center">
+            <div id="manual-status" class="status-text"></div>
+          </div>
+          <div class="manual-cell manual-right manual-only">
+            <button id="backprop-btn" class="manual-btn manual-btn-backprop">
+              Bakåtpropagering
+            </button>
+            <div id="manual-feedback"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="calculation-area">
+      <h2 class="section-heading">Beräkningsområde</h2>
       <div class="calculation-grid">
         <div class="calc-group">
           <h2 class="calc-title">Beräkningar</h2>
@@ -136,28 +159,6 @@
             >
           </div>
           <div id="ho-calculation" class="calculation-output"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="manual-training-panel">
-      <div id="manual-controls" class="manual-controls manual-inactive">
-        <div class="manual-grid">
-          <div class="manual-cell manual-left manual-only">
-            <button id="load-next-example" class="manual-btn manual-btn-next">
-              Ladda nästa exempel
-            </button>
-            <div id="manual-example-info"></div>
-          </div>
-          <div class="manual-cell manual-center">
-            <div id="manual-status" class="status-text"></div>
-          </div>
-          <div class="manual-cell manual-right manual-only">
-            <button id="backprop-btn" class="manual-btn manual-btn-backprop">
-              Bakåtpropagering
-            </button>
-            <div id="manual-feedback"></div>
-          </div>
         </div>
       </div>
     </section>
