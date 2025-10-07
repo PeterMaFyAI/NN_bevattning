@@ -131,6 +131,8 @@ const inputEls = [
   document.getElementById('input0'),
   document.getElementById('input1')
 ];
+const moistureInput = document.getElementById('moisture');
+const temperatureInput = document.getElementById('temperature');
 const hiddenEls = [
   document.getElementById('hidden0'),
   document.getElementById('hidden1'),
@@ -143,6 +145,7 @@ const outputProb = document.getElementById('output-prob');
 const predictionText = document.getElementById('prediction-text');
 const showIHSelect = document.getElementById('show-ih');
 const showHOCheckbox = document.getElementById('show-ho');
+const showCalculationsCheckbox = document.getElementById('show-calculations');
 const manualControls = document.getElementById('manual-controls');
 const loadNextBtn = document.getElementById('load-next-example');
 const manualExampleInfo = document.getElementById('manual-example-info');
@@ -166,6 +169,8 @@ const trainingButtonsRow = document.getElementById('training-data-buttons');
 const testButtonsRow = document.getElementById('test-data-buttons');
 const trainingButtonShowText = toggleTrainingBtn.textContent;
 const testButtonShowText = toggleTestBtn.textContent;
+const ihCalculationEl = document.getElementById('ih-calculation');
+const hoCalculationEl = document.getElementById('ho-calculation');
 
 const ihLines = [];
 const hoLines = [];
@@ -199,8 +204,8 @@ function edgeMid(el, side) {
 }
 
 function getInputs() {
-  const moisture = parseFloat(document.getElementById('moisture').value) || 0;
-  const temperature = parseFloat(document.getElementById('temperature').value) || 0;
+  const moisture = parseFloat(moistureInput.value) || 0;
+  const temperature = parseFloat(temperatureInput.value) || 0;
   return [moisture, temperature];
 }
 
@@ -500,6 +505,7 @@ function updateBiasLabels() {
     el.textContent = formatBias(params.B_H[idx]);
   });
   outputBiasEl.textContent = formatBias(params.B_O);
+  updateAllCalculations();
 }
 
 function updateWeightLabels() {
@@ -509,6 +515,82 @@ function updateWeightLabels() {
   hoLines.forEach((conn) => {
     conn.text.textContent = params.W_HO[conn.index].toFixed(2);
   });
+  updateAllCalculations();
+}
+
+function formatCalcNumber(value) {
+  return (Math.round(value * 100) / 100).toFixed(2);
+}
+
+function formatCalcSpan(value, className) {
+  return `<span class="calc-value ${className}">${formatCalcNumber(value)}</span>`;
+}
+
+function hideCalculation(el) {
+  if (!el) return;
+  el.innerHTML = '';
+  el.classList.add('calc-hidden');
+}
+
+function showCalculation(el, html) {
+  if (!el) return;
+  el.innerHTML = html;
+  el.classList.remove('calc-hidden');
+}
+
+function updateIHCalculation() {
+  if (!ihCalculationEl) return;
+  if (!['h0', 'h1', 'h2'].includes(currentIHSelection)) {
+    hideCalculation(ihCalculationEl);
+    return;
+  }
+  const idx = Number(currentIHSelection.slice(1));
+  const [x0, x1] = getInputs();
+  const w0 = params.W_IH[0][idx];
+  const w1 = params.W_IH[1][idx];
+  const bias = params.B_H[idx];
+  const sum = x0 * w0 + x1 * w1 + bias;
+  const html = `${formatCalcSpan(w0, 'calc-weight')} * ${formatCalcSpan(
+    x0,
+    'calc-input'
+  )} + ${formatCalcSpan(w1, 'calc-weight')} * ${formatCalcSpan(
+    x1,
+    'calc-input'
+  )} + ${formatCalcSpan(bias, 'calc-bias-hidden')} = ${formatCalcSpan(
+    sum,
+    'calc-result-hidden'
+  )}`;
+  showCalculation(ihCalculationEl, html);
+}
+
+function updateHOCalculation() {
+  if (!hoCalculationEl) return;
+  if (!showCalculationsCheckbox || !showCalculationsCheckbox.checked) {
+    hideCalculation(hoCalculationEl);
+    return;
+  }
+  const forward = forwardPassDisplay(getInputs());
+  const bias = params.B_O;
+  const parts = forward.actHidden.map((value, idx) =>
+    `${formatCalcSpan(params.W_HO[idx], 'calc-weight')} * ${formatCalcSpan(
+      value,
+      'calc-hidden-node'
+    )}`
+  );
+  const sum = forward.actHidden.reduce(
+    (acc, value, idx) => acc + value * params.W_HO[idx],
+    bias
+  );
+  const html = `${parts.join(' + ')} + ${formatCalcSpan(
+    bias,
+    'calc-bias-output'
+  )} = ${formatCalcSpan(sum, 'calc-result-output')}`;
+  showCalculation(hoCalculationEl, html);
+}
+
+function updateAllCalculations() {
+  updateIHCalculation();
+  updateHOCalculation();
 }
 
 function hideIH() {
@@ -524,7 +606,10 @@ function hideIH() {
 function showIH(opt) {
   currentIHSelection = opt;
   hideIH();
-  if (opt === 'none') return;
+  if (opt === 'none') {
+    updateIHCalculation();
+    return;
+  }
   if (opt === 'all') {
     ihLines.forEach((o) => {
       o.line.style.display = 'block';
@@ -533,6 +618,7 @@ function showIH(opt) {
     hiddenBiasEls.forEach((el) => {
       el.style.visibility = 'visible';
     });
+    updateIHCalculation();
     return;
   }
   const idx = Number(opt.replace('h', ''));
@@ -543,6 +629,7 @@ function showIH(opt) {
     }
   });
   hiddenBiasEls[idx].style.visibility = 'visible';
+  updateIHCalculation();
 }
 
 function hideHO() {
@@ -564,6 +651,7 @@ function toggleHO(show) {
   } else {
     hideHO();
   }
+  updateHOCalculation();
 }
 
 /***** Layouthjälp för tabeller *****/
@@ -968,6 +1056,7 @@ document.getElementById('calc-hidden').addEventListener('click', () => {
   displayForward.preHidden.forEach((pre, idx) => {
     setHiddenCell(idx, pre, displayForward.actHidden[idx]);
   });
+  updateAllCalculations();
 });
 
 document.getElementById('calc-output').addEventListener('click', () => {
@@ -979,6 +1068,7 @@ document.getElementById('calc-output').addEventListener('click', () => {
   });
   const modelForward = forwardPassModel(x);
   updatePrediction(modelForward.output);
+  updateAllCalculations();
 });
 
 showIHSelect.addEventListener('change', (e) => {
@@ -987,6 +1077,12 @@ showIHSelect.addEventListener('change', (e) => {
 });
 
 showHOCheckbox.addEventListener('change', (e) => toggleHO(e.target.checked));
+
+showCalculationsCheckbox.addEventListener('change', () => updateHOCalculation());
+
+[moistureInput, temperatureInput].forEach((input) =>
+  input.addEventListener('input', updateAllCalculations)
+);
 
 manualTrainingBtn.addEventListener('click', () => {
   if (autoRunning) return;
