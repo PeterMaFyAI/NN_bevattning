@@ -83,18 +83,20 @@ h1 {
 }
 
 #manual-training-panel {
-  max-width: 1500px;
-  margin: 0 auto 26px;
-  padding: 0 24px 10px;
+  max-width: 1100px;
+  margin: 0 auto 30px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
-
 
 .manual-controls {
   width: 100%;
 }
 
 .manual-controls.manual-inactive {
-  display: none;
+  display: block;
 }
 
 .manual-controls.manual-inactive .manual-only {
@@ -104,6 +106,8 @@ h1 {
 .manual-controls.manual-inactive .manual-grid {
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
+  margin: 0 auto;
+  max-width: 520px;
 }
 
 .manual-grid {
@@ -131,6 +135,14 @@ h1 {
 .manual-right {
   align-items: flex-end;
   text-align: right;
+}
+
+.section-heading {
+  text-align: center;
+  margin: 0 0 24px;
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #2c3e50;
 }
 
 .manual-controls #manual-example-info {
