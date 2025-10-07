@@ -456,9 +456,10 @@ input[type="checkbox"] {
   text-align: left;
 }
 
+
 .data-section:last-child {
-  align-items: flex-end;
-  text-align: right;
+  align-items: center;
+  text-align: center;
 }
 
 .data-buttons {
@@ -468,8 +469,8 @@ input[type="checkbox"] {
 }
 
 .data-section:last-child .data-buttons {
-  align-self: flex-end;
-  justify-content: flex-end;
+  align-self: center;
+  justify-content: center;
 }
 
 .data-status {
@@ -477,7 +478,7 @@ input[type="checkbox"] {
 }
 
 .data-section:last-child .data-status {
-  text-align: right;
+  text-align: center;
 }
 
 .table-container {
@@ -493,6 +494,7 @@ input[type="checkbox"] {
 
 .data-section:last-child .table-container {
   margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 900px) {
@@ -516,6 +518,7 @@ input[type="checkbox"] {
 
   .data-section:last-child .table-container {
     margin-left: 0;
+    margin-right: 0;
   }
 }
 
