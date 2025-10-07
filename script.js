@@ -224,9 +224,9 @@ function highlightNode(el, className = 'pulse', duration = 800) {
 function highlightBiasLabel(el, duration = 800) {
   const prevVisibility = el.style.visibility;
   el.style.visibility = 'visible';
-  el.classList.add('update-flash');
+  el.classList.add('update-flash', 'bias-update');
   setTimeout(() => {
-    el.classList.remove('update-flash');
+    el.classList.remove('update-flash', 'bias-update');
     if (prevVisibility === 'hidden') {
       el.style.visibility = 'hidden';
     }
@@ -257,11 +257,18 @@ function updateManualStatus(text) {
 function updateControlStates() {
   manualTrainingBtn.disabled = autoRunning;
   autoTrainBtn.disabled = manualMode || autoRunning;
-  loadNextBtn.disabled = autoRunning || manualAnimating;
-  backpropBtn.disabled = autoRunning || manualAnimating;
+  const loadNextShouldBeDisabled =
+    autoRunning || manualAnimating || !manualMode || manualForwardCache !== null;
+  loadNextBtn.disabled = loadNextShouldBeDisabled;
+  const backpropShouldBeDisabled =
+    autoRunning || manualAnimating || !manualMode || !manualForwardCache;
+  backpropBtn.disabled = backpropShouldBeDisabled;
   resetBtn.disabled = autoRunning || manualAnimating;
   epochsInput.disabled = autoRunning;
   batchInput.disabled = autoRunning;
+  toggleTrainingBtn.disabled = autoRunning || manualAnimating;
+  toggleTestBtn.disabled = autoRunning || manualAnimating;
+  evaluateTestBtn.disabled = autoRunning || manualAnimating;
 }
 
 animateTrainingCheckbox.addEventListener('change', () => {
@@ -595,7 +602,7 @@ function setManualMode(active) {
   manualFeedback.textContent = '';
   manualFeedback.classList.remove('result-correct', 'result-wrong');
   backpropBtn.classList.add('hidden');
-  loadNextBtn.classList.remove('hidden');
+  backpropBtn.disabled = true;
   if (active) {
     storedIHSelection = currentIHSelection;
     storedHOVisible = currentHOVisible;
@@ -627,6 +634,7 @@ async function runManualForward(example) {
   manualAnimating = true;
   updateControlStates();
   backpropBtn.classList.add('hidden');
+  backpropBtn.disabled = true;
   manualFeedback.textContent = '';
   manualFeedback.classList.remove('result-correct', 'result-wrong');
   manualExampleInfo.textContent = `Exempel ${example.id}: Jordfuktighet ${
@@ -694,7 +702,7 @@ function getNextExample() {
 
 async function handleLoadNextExample() {
   if (!manualMode || manualAnimating || autoRunning) return;
-  loadNextBtn.classList.add('hidden');
+  loadNextBtn.disabled = true;
   const example = getNextExample();
   await runManualForward(example);
 }
@@ -757,7 +765,6 @@ async function handleBackprop() {
   manualForwardCache = null;
   manualActiveExample = null;
   backpropBtn.classList.add('hidden');
-  loadNextBtn.classList.remove('hidden');
   updateManualStatus(
     `Nästa exempel i kön: ${trainingData[manualPointer].id}`
   );
