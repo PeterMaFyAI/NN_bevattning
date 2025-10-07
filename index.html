@@ -130,7 +130,9 @@
             </button>
             <div id="manual-example-info"></div>
           </div>
-          <div class="manual-cell manual-center"></div>
+          <div class="manual-cell manual-center">
+            <div id="manual-status" class="status-text"></div>
+          </div>
           <div class="manual-cell manual-right">
             <button id="backprop-btn" class="manual-btn manual-btn-backprop">
               Bakåtpropagering
@@ -161,19 +163,26 @@
         </button>
       </div>
 
-      <div class="data-actions">
-        <button id="toggle-training-table">Visa träningsdata</button>
-        <button id="evaluate-training-btn">Utvärdera på träningsdata</button>
-        <button id="toggle-test-table">Visa testdata</button>
-        <button id="evaluate-test-btn">Utvärdera på testdata</button>
+      <div class="data-sections">
+        <div class="data-section">
+          <div class="data-buttons">
+            <button id="toggle-training-table">Visa träningsdata</button>
+            <button id="evaluate-training-btn">Utvärdera på träningsdata</button>
+          </div>
+          <div id="training-evaluation" class="status-text data-status"></div>
+          <div id="training-table-container" class="table-container hidden"></div>
+        </div>
+        <div class="data-section">
+          <div class="data-buttons">
+            <button id="toggle-test-table">Visa testdata</button>
+            <button id="evaluate-test-btn">Utvärdera på testdata</button>
+          </div>
+          <div id="test-evaluation" class="status-text data-status"></div>
+          <div id="test-table-container" class="table-container hidden"></div>
+        </div>
       </div>
 
-      <div id="manual-status" class="status-text"></div>
       <div id="auto-status" class="status-text"></div>
-
-      <div id="training-table-container" class="table-container hidden"></div>
-      <div id="evaluation-result" class="status-text"></div>
-      <div id="test-table-container" class="table-container hidden"></div>
     </section>
 
     <script src="script.js"></script>

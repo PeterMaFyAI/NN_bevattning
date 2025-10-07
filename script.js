@@ -161,7 +161,8 @@ const evaluateTrainingBtn = document.getElementById('evaluate-training-btn');
 const toggleTestBtn = document.getElementById('toggle-test-table');
 const testTableContainer = document.getElementById('test-table-container');
 const evaluateTestBtn = document.getElementById('evaluate-test-btn');
-const evaluationResult = document.getElementById('evaluation-result');
+const trainingEvaluation = document.getElementById('training-evaluation');
+const testEvaluation = document.getElementById('test-evaluation');
 
 const ihLines = [];
 const hoLines = [];
@@ -796,12 +797,6 @@ async function handleBackprop() {
     }
   }
 
-  manualFeedback.textContent += ` (fel=${round2(
-    Math.abs(
-      manualForwardCache.forward.output -
-        LABEL_TO_TARGET[manualForwardCache.example.label]
-    )
-  )})`;
   manualForwardCache = null;
   manualActiveExample = null;
   updateManualStatus(
@@ -863,7 +858,7 @@ async function runAutoTraining() {
 }
 
 /***** Utvärdering *****/
-function evaluateDataset(data, label) {
+function evaluateDataset(data, targetEl) {
   let totalError = 0;
   let correct = 0;
   data.forEach((example) => {
@@ -876,13 +871,13 @@ function evaluateDataset(data, label) {
   });
   const mse = totalError / data.length;
   const accuracy = (correct / data.length) * 100;
-  evaluationResult.textContent = `Utvärdering (${label}): Medelkvadratiskt fel: ${round2(
+  targetEl.textContent = `Medelkvadratiskt fel: ${round2(
     mse
   )} – Träffsäkerhet: ${round2(accuracy)} %`;
 }
 
-const evaluateTrainingSet = () => evaluateDataset(trainingData, 'Träning');
-const evaluateTestSet = () => evaluateDataset(testData, 'Test');
+const evaluateTrainingSet = () => evaluateDataset(trainingData, trainingEvaluation);
+const evaluateTestSet = () => evaluateDataset(testData, testEvaluation);
 
 /***** Återställning *****/
 function resetNetwork() {
@@ -897,7 +892,8 @@ function resetNetwork() {
   manualStatus.textContent = manualMode
     ? `Nästa exempel i kön: ${trainingData[manualPointer].id}`
     : '';
-  evaluationResult.textContent = '';
+  trainingEvaluation.textContent = '';
+  testEvaluation.textContent = '';
   autoStatus.textContent = '';
   resetHiddenDisplays();
   updateBiasLabels();
