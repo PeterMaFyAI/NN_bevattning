@@ -437,21 +437,28 @@ input[type="checkbox"] {
 .button-muted:hover {
   opacity: 0.55;
 }
-
 .data-sections {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 28px;
+  align-items: start;
   margin-bottom: 16px;
 }
 
 .data-section {
-  flex: 1 1 320px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.data-section:first-child {
   align-items: flex-start;
+  text-align: left;
+}
+
+.data-section:last-child {
+  align-items: flex-end;
+  text-align: right;
 }
 
 .data-buttons {
@@ -460,8 +467,17 @@ input[type="checkbox"] {
   gap: 12px;
 }
 
+.data-section:last-child .data-buttons {
+  align-self: flex-end;
+  justify-content: flex-end;
+}
+
 .data-status {
   text-align: left;
+}
+
+.data-section:last-child .data-status {
+  text-align: right;
 }
 
 .table-container {
@@ -471,8 +487,36 @@ input[type="checkbox"] {
   border-radius: 14px;
   padding: 18px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  align-self: flex-start;
+  align-self: stretch;
   width: min(var(--table-width, 100%), 100%);
+}
+
+.data-section:last-child .table-container {
+  margin-left: auto;
+}
+
+@media (max-width: 900px) {
+  .data-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .data-section:last-child {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .data-section:last-child .data-buttons {
+    align-self: flex-start;
+    justify-content: flex-start;
+  }
+
+  .data-section:last-child .data-status {
+    text-align: left;
+  }
+
+  .data-section:last-child .table-container {
+    margin-left: 0;
+  }
 }
 
 .table-scroll {
