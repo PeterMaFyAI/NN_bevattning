@@ -123,17 +123,24 @@
 
     <section id="manual-training-panel">
       <div id="manual-controls" class="manual-controls hidden">
-        <div class="manual-controls-buttons">
-          <button id="load-next-example" class="accent-button">
-            Ladda nästa exempel
-          </button>
-          <button id="backprop-btn" class="secondary hidden">
-            Bakåtpropagering
-          </button>
-        </div>
-        <div class="manual-controls-info">
-          <div id="manual-example-info"></div>
-          <div id="manual-feedback"></div>
+        <div class="manual-grid">
+          <div class="manual-cell manual-left">
+            <button id="load-next-example" class="manual-btn manual-btn-next">
+              Ladda nästa exempel
+            </button>
+          </div>
+          <div class="manual-cell manual-center">
+            <div id="manual-example-info"></div>
+          </div>
+          <div class="manual-cell manual-right">
+            <button
+              id="backprop-btn"
+              class="manual-btn manual-btn-backprop hidden"
+            >
+              Bakåtpropagering
+            </button>
+            <div id="manual-feedback"></div>
+          </div>
         </div>
       </div>
     </section>
