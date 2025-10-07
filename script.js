@@ -171,6 +171,8 @@ const trainingButtonShowText = toggleTrainingBtn.textContent;
 const testButtonShowText = toggleTestBtn.textContent;
 const ihCalculationEl = document.getElementById('ih-calculation');
 const hoCalculationEl = document.getElementById('ho-calculation');
+const hiddenCalcOverlay = document.getElementById('hidden-calculation-overlay');
+const outputCalcOverlay = document.getElementById('output-calculation-overlay');
 
 const ihLines = [];
 const hoLines = [];
@@ -216,6 +218,8 @@ function resetHiddenDisplays() {
   });
   outputProb.textContent = '?';
   predictionText.textContent = 'Bevattning startas: ?';
+  hideOverlayCalculation(hiddenCalcOverlay);
+  hideOverlayCalculation(outputCalcOverlay);
 }
 
 function setHiddenCell(idx, pre, post) {
@@ -542,10 +546,52 @@ function showCalculation(el, html) {
   el.classList.remove('calc-hidden');
 }
 
+function hideOverlayCalculation(el) {
+  if (!el) return;
+  el.innerHTML = '';
+  el.classList.add('calc-hidden');
+}
+
+function showOverlayCalculation(el, html) {
+  if (!el) return;
+  el.innerHTML = html;
+  el.classList.remove('calc-hidden');
+  positionCalculationOverlays();
+}
+
+function positionCalculationOverlays() {
+  if (!container) return;
+  const containerRect = container.getBoundingClientRect();
+  const bottomHiddenNode = hiddenEls[hiddenEls.length - 1];
+  const bottomInputNode = inputEls[inputEls.length - 1];
+  const offsetY = 12;
+  if (bottomHiddenNode && outputCalcOverlay) {
+    const rect = bottomHiddenNode.getBoundingClientRect();
+    const left = rect.right - containerRect.left + 18;
+    const top = rect.bottom - containerRect.top + offsetY;
+    outputCalcOverlay.style.left = `${left}px`;
+    outputCalcOverlay.style.top = `${top}px`;
+  }
+  if (bottomInputNode && hiddenCalcOverlay) {
+    const rect = bottomInputNode.getBoundingClientRect();
+    const left = rect.right - containerRect.left + 18;
+    let top = 0;
+    if (outputCalcOverlay && outputCalcOverlay.style.top) {
+      top = parseFloat(outputCalcOverlay.style.top);
+    } else if (bottomHiddenNode) {
+      const hiddenRect = bottomHiddenNode.getBoundingClientRect();
+      top = hiddenRect.bottom - containerRect.top + offsetY;
+    }
+    hiddenCalcOverlay.style.left = `${left}px`;
+    hiddenCalcOverlay.style.top = `${top}px`;
+  }
+}
+
 function updateIHCalculation() {
   if (!ihCalculationEl) return;
   if (!['h0', 'h1', 'h2'].includes(currentIHSelection)) {
     hideCalculation(ihCalculationEl);
+    hideOverlayCalculation(hiddenCalcOverlay);
     return;
   }
   const idx = Number(currentIHSelection.slice(1));
@@ -565,12 +611,18 @@ function updateIHCalculation() {
     'calc-result-hidden'
   )}`;
   showCalculation(ihCalculationEl, html);
+  if (currentIHSelection === 'h0') {
+    showOverlayCalculation(hiddenCalcOverlay, html);
+  } else {
+    hideOverlayCalculation(hiddenCalcOverlay);
+  }
 }
 
 function updateHOCalculation() {
   if (!hoCalculationEl) return;
   if (!showCalculationsCheckbox || !showCalculationsCheckbox.checked) {
     hideCalculation(hoCalculationEl);
+    hideOverlayCalculation(outputCalcOverlay);
     return;
   }
   const forward = forwardPassDisplay(getInputs());
@@ -590,6 +642,7 @@ function updateHOCalculation() {
     'calc-bias-output'
   )} = ${formatCalcSpan(sum, 'calc-result-output')}`;
   showCalculation(hoCalculationEl, html);
+  showOverlayCalculation(outputCalcOverlay, html);
 }
 
 function updateAllCalculations() {
@@ -1127,6 +1180,7 @@ function refresh() {
     updateBiasLabels();
     updateWeightLabels();
     updateDataTableWidths();
+    positionCalculationOverlays();
   });
 }
 
