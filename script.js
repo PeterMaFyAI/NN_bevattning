@@ -153,11 +153,11 @@ const autoStatus = document.getElementById('auto-status');
 const manualTrainingBtn = document.getElementById('manual-training-btn');
 const autoTrainBtn = document.getElementById('auto-train-btn');
 const epochsInput = document.getElementById('epochs-input');
-const batchInput = document.getElementById('batch-input');
 const animateTrainingCheckbox = document.getElementById('animate-training');
 const resetBtn = document.getElementById('reset-weights-btn');
 const toggleTrainingBtn = document.getElementById('toggle-training-table');
 const trainingTableContainer = document.getElementById('training-table-container');
+const evaluateTrainingBtn = document.getElementById('evaluate-training-btn');
 const toggleTestBtn = document.getElementById('toggle-test-table');
 const testTableContainer = document.getElementById('test-table-container');
 const evaluateTestBtn = document.getElementById('evaluate-test-btn');
@@ -176,6 +176,8 @@ let manualForwardCache = null;
 let manualAnimating = false;
 let autoRunning = false;
 let autoAnimationEnabled = animateTrainingCheckbox.checked;
+const BATCH_SIZE = 1;
+let visibleTable = null;
 
 /***** Utility-funktioner *****/
 const round2 = (x) => Math.round(x * 100) / 100;
@@ -273,9 +275,9 @@ function updateControlStates() {
   backpropBtn.disabled = backpropShouldBeDisabled;
   resetBtn.disabled = autoRunning || manualAnimating;
   epochsInput.disabled = autoRunning;
-  batchInput.disabled = autoRunning;
   toggleTrainingBtn.disabled = autoRunning || manualAnimating;
   toggleTestBtn.disabled = autoRunning || manualAnimating;
+  evaluateTrainingBtn.disabled = autoRunning || manualAnimating;
   evaluateTestBtn.disabled = autoRunning || manualAnimating;
 }
 
@@ -585,19 +587,54 @@ function createTableMarkup(data, title) {
   `;
 }
 
-function toggleTable(containerEl, buttonEl, data, title) {
-  const isHidden = containerEl.classList.contains('hidden');
-  if (isHidden) {
-    if (!containerEl.dataset.rendered) {
-      containerEl.innerHTML = createTableMarkup(data, title);
-      containerEl.dataset.rendered = 'true';
-    }
-    containerEl.classList.remove('hidden');
-    buttonEl.textContent = buttonEl.textContent.replace('Visa', 'Dölj');
-  } else {
-    containerEl.classList.add('hidden');
-    buttonEl.textContent = buttonEl.textContent.replace('Dölj', 'Visa');
+const tableConfigs = {
+  training: {
+    container: trainingTableContainer,
+    button: toggleTrainingBtn,
+    data: trainingData,
+    title: 'Träning (50 rader)'
+  },
+  test: {
+    container: testTableContainer,
+    button: toggleTestBtn,
+    data: testData,
+    title: 'Test (10 rader)'
   }
+};
+
+function ensureTableRendered(type) {
+  const config = tableConfigs[type];
+  if (!config.container.dataset.rendered) {
+    config.container.innerHTML = createTableMarkup(config.data, config.title);
+    config.container.dataset.rendered = 'true';
+  }
+}
+
+function showTable(type) {
+  ensureTableRendered(type);
+  const config = tableConfigs[type];
+  config.container.classList.remove('hidden');
+  config.button.textContent = config.button.textContent.replace('Visa', 'Dölj');
+  visibleTable = type;
+}
+
+function hideTable(type) {
+  const config = tableConfigs[type];
+  config.container.classList.add('hidden');
+  config.button.textContent = config.button.textContent.replace('Dölj', 'Visa');
+  if (visibleTable === type) {
+    visibleTable = null;
+  }
+}
+
+function toggleTableVisibility(type) {
+  if (visibleTable === type) {
+    hideTable(type);
+    return;
+  }
+  const otherType = type === 'training' ? 'test' : 'training';
+  hideTable(otherType);
+  showTable(type);
 }
 
 /***** Manuell träning *****/
@@ -791,7 +828,6 @@ async function runAutoTraining() {
     return;
   }
   const epochs = Math.max(1, parseInt(epochsInput.value, 10) || 1);
-  const batchSize = Math.max(1, parseInt(batchInput.value, 10) || 1);
   autoRunning = true;
   autoTrainBtn.textContent = 'Träning pågår...';
   autoStatus.textContent = 'Startar automatisk träning...';
@@ -802,8 +838,8 @@ async function runAutoTraining() {
     const shuffled = shuffle(trainingData);
     let epochLossSum = 0;
     let sampleCount = 0;
-    for (let i = 0; i < shuffled.length; i += batchSize) {
-      const batch = shuffled.slice(i, i + batchSize);
+    for (let i = 0; i < shuffled.length; i += BATCH_SIZE) {
+      const batch = shuffled.slice(i, i + BATCH_SIZE);
       const grads = computeBatchGradients(batch);
       applyGradients(grads, LEARNING_RATE_AUTO);
       updateBiasLabels();
@@ -827,10 +863,10 @@ async function runAutoTraining() {
 }
 
 /***** Utvärdering *****/
-function evaluateTestSet() {
+function evaluateDataset(data, label) {
   let totalError = 0;
   let correct = 0;
-  testData.forEach((example) => {
+  data.forEach((example) => {
     const forward = forwardPassModel([example.moisture, example.temperature]);
     const target = LABEL_TO_TARGET[example.label];
     const error = forward.output - target;
@@ -838,12 +874,15 @@ function evaluateTestSet() {
     const predicted = LABEL_FROM_OUTPUT(forward.output);
     if (predicted === example.label) correct += 1;
   });
-  const mse = totalError / testData.length;
-  const accuracy = (correct / testData.length) * 100;
-  evaluationResult.textContent = `Medelkvadratiskt fel: ${round2(
+  const mse = totalError / data.length;
+  const accuracy = (correct / data.length) * 100;
+  evaluationResult.textContent = `Utvärdering (${label}): Medelkvadratiskt fel: ${round2(
     mse
   )} – Träffsäkerhet: ${round2(accuracy)} %`;
 }
+
+const evaluateTrainingSet = () => evaluateDataset(trainingData, 'Träning');
+const evaluateTestSet = () => evaluateDataset(testData, 'Test');
 
 /***** Återställning *****/
 function resetNetwork() {
@@ -906,13 +945,11 @@ autoTrainBtn.addEventListener('click', runAutoTraining);
 
 resetBtn.addEventListener('click', resetNetwork);
 
-toggleTrainingBtn.addEventListener('click', () =>
-  toggleTable(trainingTableContainer, toggleTrainingBtn, trainingData, 'Träning (50 rader)')
-);
+toggleTrainingBtn.addEventListener('click', () => toggleTableVisibility('training'));
 
-toggleTestBtn.addEventListener('click', () =>
-  toggleTable(testTableContainer, toggleTestBtn, testData, 'Test (10 rader)')
-);
+toggleTestBtn.addEventListener('click', () => toggleTableVisibility('test'));
+
+evaluateTrainingBtn.addEventListener('click', evaluateTrainingSet);
 
 evaluateTestBtn.addEventListener('click', evaluateTestSet);
 

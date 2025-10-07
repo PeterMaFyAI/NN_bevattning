@@ -260,6 +260,10 @@ button {
   font-size: 1em;
   cursor: pointer;
   transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 button:hover {
@@ -278,12 +282,16 @@ button:disabled {
   background: #1e874b;
 }
 
-.secondary {
-  background: #95a5a6;
+.danger-button {
+  background: #e74c3c;
 }
 
-.secondary:hover {
-  background: #7f8c8d;
+.danger-button:hover {
+  background: #c0392b;
+}
+
+.danger-button .icon {
+  font-size: 1.2em;
 }
 
 .manual-btn {
@@ -364,19 +372,12 @@ input[type="checkbox"] {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  justify-content: center;
-  margin-bottom: 16px;
+  justify-content: flex-start;
+  margin-bottom: 12px;
   align-items: center;
 }
 
-.auto-training-controls {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.auto-training-controls label {
+.epochs-control {
   display: flex;
   flex-direction: column;
   font-weight: 600;
@@ -384,12 +385,28 @@ input[type="checkbox"] {
   color: #2c3e50;
 }
 
-.auto-training-controls input {
+.epochs-control input {
   width: 120px;
   padding: 6px 8px;
   border: 1px solid #bbb;
   border-radius: 6px;
   font-size: 1em;
+}
+
+.animation-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: flex-start;
+  margin-bottom: 16px;
 }
 
 .status-text {
@@ -442,14 +459,6 @@ table.data-table tbody tr:nth-child(odd) {
 
 table.data-table tbody tr:hover {
   background: #edf5ff;
-}
-
-.test-actions {
-  margin-top: 24px;
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
 /* ---------- Animationer ---------- */
