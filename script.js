@@ -835,17 +835,18 @@ async function runManualForward(example) {
   updatePrediction(displayForward.actHidden);
   await manualWait(350);
 
-  const predicted = LABEL_FROM_OUTPUT(modelForward.output);
+  const predictedDisplay = LABEL_FROM_OUTPUT(displayForward.output);
   const target = example.label;
   manualFeedback.textContent =
-    predicted === target
-      ? `Rätt! Nätverket förutsåg ${predicted}.`
-      : `Fel! Förväntat ${target}, men nätverket gav ${predicted}.`;
+    predictedDisplay === target
+      ? `Rätt! Nätverket förutsåg ${predictedDisplay}.`
+      : `Fel! Förväntat ${target}, men nätverket gav ${predictedDisplay}.`;
   manualFeedback.classList.add(
-    predicted === target ? 'result-correct' : 'result-wrong'
+    predictedDisplay === target ? 'result-correct' : 'result-wrong'
   );
   manualForwardCache = {
     forward: modelForward,
+    display: displayForward,
     example
   };
   manualActiveExample = example;
