@@ -572,18 +572,23 @@ function positionCalculationOverlays() {
     outputCalcOverlay.style.left = `${left}px`;
     outputCalcOverlay.style.top = `${top}px`;
   }
-  if (bottomInputNode && hiddenCalcOverlay) {
-    const rect = bottomInputNode.getBoundingClientRect();
-    const left = rect.right - containerRect.left + 18;
-    let top = 0;
-    if (outputCalcOverlay && outputCalcOverlay.style.top) {
-      top = parseFloat(outputCalcOverlay.style.top);
-    } else if (bottomHiddenNode) {
-      const hiddenRect = bottomHiddenNode.getBoundingClientRect();
-      top = hiddenRect.bottom - containerRect.top + offsetY;
+  if (hiddenCalcOverlay) {
+    const selectedHiddenIdx = ['h0', 'h1', 'h2'].includes(currentIHSelection)
+      ? Number(currentIHSelection.slice(1))
+      : null;
+    const targetNode =
+      selectedHiddenIdx !== null ? hiddenEls[selectedHiddenIdx] : bottomInputNode;
+    if (targetNode) {
+      const rect = targetNode.getBoundingClientRect();
+      const left = rect.right - containerRect.left + 18;
+      const overlayHeight = hiddenCalcOverlay.offsetHeight || 0;
+      let top = rect.top - containerRect.top + (rect.height - overlayHeight) / 2;
+      if (!Number.isFinite(top)) {
+        top = rect.bottom - containerRect.top + offsetY;
+      }
+      hiddenCalcOverlay.style.left = `${left}px`;
+      hiddenCalcOverlay.style.top = `${top}px`;
     }
-    hiddenCalcOverlay.style.left = `${left}px`;
-    hiddenCalcOverlay.style.top = `${top}px`;
   }
 }
 
@@ -611,11 +616,7 @@ function updateIHCalculation() {
     'calc-result-hidden'
   )}`;
   showCalculation(ihCalculationEl, html);
-  if (currentIHSelection === 'h0') {
-    showOverlayCalculation(hiddenCalcOverlay, html);
-  } else {
-    hideOverlayCalculation(hiddenCalcOverlay);
-  }
+  showOverlayCalculation(hiddenCalcOverlay, html);
 }
 
 function updateHOCalculation() {
