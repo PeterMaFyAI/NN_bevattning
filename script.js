@@ -19,7 +19,7 @@ function cloneParams(src) {
 }
 
 let params = cloneParams(INITIAL_PARAMS);
-const LEARNING_RATE_MANUAL = 0.002;
+const LEARNING_RATE_MANUAL = 0.02;
 const LEARNING_RATE_AUTO = 0.0006;
 
 /***** Dataset *****/
@@ -180,6 +180,8 @@ let autoAnimationEnabled = animateTrainingCheckbox.checked;
 /***** Utility-funktioner *****/
 const round2 = (x) => Math.round(x * 100) / 100;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const MANUAL_FORWARD_DELAY_FACTOR = 2;
+const manualWait = (ms) => wait(ms * MANUAL_FORWARD_DELAY_FACTOR);
 
 function edgeMid(el, side) {
   const r = el.getBoundingClientRect();
@@ -648,7 +650,7 @@ async function runManualForward(example) {
   document.getElementById('temperature').value = example.temperature;
 
   inputEls.forEach((el) => highlightNode(el));
-  await wait(500);
+  await manualWait(500);
 
   const x = [example.moisture, example.temperature];
   const displayForward = forwardPassDisplay(x);
@@ -664,7 +666,7 @@ async function runManualForward(example) {
       .filter((line) => line.to === j)
       .forEach((line) => highlightLine(line, 'svg-forward', 'svg-forward-text'));
     setHiddenCell(j, displayForward.preHidden[j], displayForward.actHidden[j]);
-    await wait(450);
+    await manualWait(450);
   }
 
   updateManualStatus('Beräknar utmatningslagret...');
@@ -674,7 +676,7 @@ async function runManualForward(example) {
     highlightLine(line, 'svg-forward', 'svg-forward-text')
   );
   updatePrediction(modelForward.output);
-  await wait(350);
+  await manualWait(350);
 
   const predicted = LABEL_FROM_OUTPUT(modelForward.output);
   const target = example.label;
