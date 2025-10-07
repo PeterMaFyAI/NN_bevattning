@@ -450,7 +450,7 @@ function buildConnections() {
       outL.y,
       params.W_HO[j].toFixed(2),
       {
-        labelRatio: 2 / 3,
+        labelRatio: 1 / 3,
         verticalOffset: -2,
         normalOffset: -6,
         align: true
@@ -463,11 +463,16 @@ function buildConnections() {
   toggleHO(currentHOVisible);
 }
 
+function formatBias(value) {
+  const formatted = value.toFixed(2);
+  return value >= 0 ? `+${formatted}` : formatted;
+}
+
 function updateBiasLabels() {
   hiddenBiasEls.forEach((el, idx) => {
-    el.textContent = `b=${params.B_H[idx].toFixed(2)}`;
+    el.textContent = formatBias(params.B_H[idx]);
   });
-  outputBiasEl.textContent = `b=${params.B_O.toFixed(2)}`;
+  outputBiasEl.textContent = formatBias(params.B_O);
 }
 
 function updateWeightLabels() {
@@ -714,7 +719,7 @@ async function handleBackprop() {
   );
   const lr = LEARNING_RATE_MANUAL;
 
-  outputBiasEl.textContent = `b=${params.B_O.toFixed(2)}`;
+  outputBiasEl.textContent = formatBias(params.B_O);
   highlightBiasLabel(outputBiasEl, 900);
   params.B_O -= lr * grads.B_O;
   updateBiasLabels();
