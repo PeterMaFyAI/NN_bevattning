@@ -223,7 +223,11 @@ function setHiddenCell(idx, pre, post) {
   document.getElementById(`post-h${idx}`).textContent = round2(post);
 }
 
-function updatePrediction(value) {
+function updatePrediction(hiddenActivations = hiddenOut) {
+  const value = hiddenActivations.reduce(
+    (sum, activation, idx) => sum + activation * params.W_HO[idx],
+    params.B_O
+  );
   outputProb.textContent = round2(value);
   predictionText.textContent = `Bevattning startas: ${value > 0 ? 'ja' : 'nej'}`;
 }
@@ -830,7 +834,7 @@ async function runManualForward(example) {
   hoLines.forEach((line) =>
     highlightLine(line, 'svg-forward', 'svg-forward-text')
   );
-  updatePrediction(modelForward.output);
+  updatePrediction(displayForward.actHidden);
   await manualWait(350);
 
   const predicted = LABEL_FROM_OUTPUT(modelForward.output);
@@ -1066,8 +1070,7 @@ document.getElementById('calc-output').addEventListener('click', () => {
   displayForward.preHidden.forEach((pre, idx) => {
     setHiddenCell(idx, pre, displayForward.actHidden[idx]);
   });
-  const modelForward = forwardPassModel(x);
-  updatePrediction(modelForward.output);
+  updatePrediction(displayForward.actHidden);
   updateAllCalculations();
 });
 
