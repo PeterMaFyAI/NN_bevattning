@@ -105,9 +105,11 @@ h1 {
 
 .manual-controls #manual-example-info {
   font-size: 0.95em;
-  color: #2c3e50;
+  color: #27ae60;
   min-height: 20px;
   max-width: 320px;
+  margin-top: 10px;
+  font-weight: 600;
 }
 
 #input-layer .node-stack {
@@ -233,6 +235,11 @@ h1 {
 
 .bias-update {
   color: #e74c3c !important;
+}
+
+.bias-forward-highlight {
+  color: #27ae60 !important;
+  animation: biasForwardPulse 0.8s ease-in-out;
 }
 
 /* ---------- Kontroller ---------- */
@@ -496,4 +503,16 @@ table.data-table tbody tr:hover {
 .svg-update-text {
   fill: #e74c3c !important;
   font-weight: 700;
+}
+
+@keyframes biasForwardPulse {
+  0% {
+    text-shadow: 0 0 0 rgba(46, 204, 113, 0);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.65);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(46, 204, 113, 0);
+  }
 }

@@ -19,7 +19,7 @@ function cloneParams(src) {
 }
 
 let params = cloneParams(INITIAL_PARAMS);
-const LEARNING_RATE_MANUAL = 0.0008;
+const LEARNING_RATE_MANUAL = 0.002;
 const LEARNING_RATE_AUTO = 0.0006;
 
 /***** Dataset *****/
@@ -175,8 +175,6 @@ let manualActiveExample = null;
 let manualForwardCache = null;
 let manualAnimating = false;
 let autoRunning = false;
-let storedIHSelection = 'none';
-let storedHOVisible = false;
 let autoAnimationEnabled = animateTrainingCheckbox.checked;
 
 /***** Utility-funktioner *****/
@@ -221,12 +219,20 @@ function highlightNode(el, className = 'pulse', duration = 800) {
   setTimeout(() => el.classList.remove(className), duration);
 }
 
-function highlightBiasLabel(el, duration = 800) {
+function highlightBiasLabel(el, duration = 800, mode = 'update') {
   const prevVisibility = el.style.visibility;
   el.style.visibility = 'visible';
-  el.classList.add('update-flash', 'bias-update');
+  if (mode === 'forward') {
+    el.classList.add('bias-forward-highlight');
+  } else {
+    el.classList.add('update-flash', 'bias-update');
+  }
   setTimeout(() => {
-    el.classList.remove('update-flash', 'bias-update');
+    if (mode === 'forward') {
+      el.classList.remove('bias-forward-highlight');
+    } else {
+      el.classList.remove('update-flash', 'bias-update');
+    }
     if (prevVisibility === 'hidden') {
       el.style.visibility = 'hidden';
     }
@@ -601,11 +607,8 @@ function setManualMode(active) {
   manualForwardCache = null;
   manualFeedback.textContent = '';
   manualFeedback.classList.remove('result-correct', 'result-wrong');
-  backpropBtn.classList.add('hidden');
   backpropBtn.disabled = true;
   if (active) {
-    storedIHSelection = currentIHSelection;
-    storedHOVisible = currentHOVisible;
     showIH('all');
     showIHSelect.value = 'all';
     toggleHO(true);
@@ -618,10 +621,10 @@ function setManualMode(active) {
     );
     manualTrainingBtn.textContent = 'Avsluta manuell träning';
   } else {
-    showIH(storedIHSelection);
-    showIHSelect.value = storedIHSelection;
-    toggleHO(storedHOVisible);
-    showHOCheckbox.checked = storedHOVisible;
+    showIH('all');
+    showIHSelect.value = 'all';
+    toggleHO(true);
+    showHOCheckbox.checked = true;
     manualControls.classList.add('hidden');
     manualExampleInfo.textContent = '';
     updateManualStatus('');
@@ -633,7 +636,6 @@ function setManualMode(active) {
 async function runManualForward(example) {
   manualAnimating = true;
   updateControlStates();
-  backpropBtn.classList.add('hidden');
   backpropBtn.disabled = true;
   manualFeedback.textContent = '';
   manualFeedback.classList.remove('result-correct', 'result-wrong');
@@ -657,7 +659,7 @@ async function runManualForward(example) {
 
   for (let j = 0; j < hiddenEls.length; j += 1) {
     highlightNode(hiddenEls[j]);
-    highlightBiasLabel(hiddenBiasEls[j]);
+    highlightBiasLabel(hiddenBiasEls[j], 800, 'forward');
     ihLines
       .filter((line) => line.to === j)
       .forEach((line) => highlightLine(line, 'svg-forward', 'svg-forward-text'));
@@ -667,7 +669,7 @@ async function runManualForward(example) {
 
   updateManualStatus('Beräknar utmatningslagret...');
   highlightNode(outputEl);
-  highlightBiasLabel(outputBiasEl);
+  highlightBiasLabel(outputBiasEl, 800, 'forward');
   hoLines.forEach((line) =>
     highlightLine(line, 'svg-forward', 'svg-forward-text')
   );
@@ -689,7 +691,6 @@ async function runManualForward(example) {
   };
   manualActiveExample = example;
   updateManualStatus('Klicka på "Bakåtpropagering" för att uppdatera vikterna.');
-  backpropBtn.classList.remove('hidden');
   manualAnimating = false;
   updateControlStates();
 }
@@ -764,7 +765,6 @@ async function handleBackprop() {
   )})`;
   manualForwardCache = null;
   manualActiveExample = null;
-  backpropBtn.classList.add('hidden');
   updateManualStatus(
     `Nästa exempel i kön: ${trainingData[manualPointer].id}`
   );
