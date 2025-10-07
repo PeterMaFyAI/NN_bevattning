@@ -165,7 +165,7 @@ h1 {
 
 #output-layer .node-stack {
   justify-content: center;
-  padding-top: 40px;
+  padding-top: 0;
 }
 
 /* ---------- SVG-ytan för linjer ---------- */
