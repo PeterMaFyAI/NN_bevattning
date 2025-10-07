@@ -7,125 +7,138 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Neuralt nätverk för bevattning</h1>
+    <section id="network-area">
+      <h1>Neuralt nätverk för bevattning</h1>
 
-    <div id="network-container">
-      <!-- ---------- Indatalager ---------- -->
-      <div id="input-layer" class="layer">
-        <h2 class="layer-title">Inmatningslager</h2>
-        <div class="node-stack">
-          <div class="input-node" id="input0">
-            <label
-              >Jordfuktighet (%)
-              <input type="number" id="moisture" value="30" step="1" />
-            </label>
-          </div>
-          <div class="input-node" id="input1">
-            <label
-              >Lufttemperatur (°C)
-              <input type="number" id="temperature" value="20" step="1" />
-            </label>
+      <div id="network-container">
+        <!-- ---------- Indatalager ---------- -->
+        <div id="input-layer" class="layer">
+          <h2 class="layer-title">Inmatningslager</h2>
+          <div class="node-stack">
+            <div class="input-node" id="input0">
+              <label
+                >Jordfuktighet (%)
+                <input type="number" id="moisture" value="30" step="1" />
+              </label>
+            </div>
+            <div class="input-node" id="input1">
+              <label
+                >Lufttemperatur (°C)
+                <input type="number" id="temperature" value="20" step="1" />
+              </label>
+            </div>
           </div>
         </div>
 
+        <!-- ---------- Dolt lager ---------- -->
+        <div id="hidden-layer" class="layer">
+          <h2 class="layer-title">Dolt lager</h2>
+          <div class="node-stack">
+            <div class="hidden-node" id="hidden0">
+              <div class="bias-label bias-hidden" id="bias-h0">?</div>
+              <div class="node-part pre" id="pre-h0">?</div>
+              <div class="node-part relu">
+                <svg viewBox="0 0 40 40">
+                  <path
+                    d="M5 20H20L35 5"
+                    stroke="#fff"
+                    stroke-width="4"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+              <div class="node-part post" id="post-h0">?</div>
+            </div>
+
+            <div class="hidden-node" id="hidden1">
+              <div class="bias-label bias-hidden" id="bias-h1">?</div>
+              <div class="node-part pre" id="pre-h1">?</div>
+              <div class="node-part relu">
+                <svg viewBox="0 0 40 40">
+                  <path
+                    d="M5 20H20L35 5"
+                    stroke="#fff"
+                    stroke-width="4"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+              <div class="node-part post" id="post-h1">?</div>
+            </div>
+
+            <div class="hidden-node" id="hidden2">
+              <div class="bias-label bias-hidden" id="bias-h2">?</div>
+              <div class="node-part pre" id="pre-h2">?</div>
+              <div class="node-part relu">
+                <svg viewBox="0 0 40 40">
+                  <path
+                    d="M5 20H20L35 5"
+                    stroke="#fff"
+                    stroke-width="4"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+              <div class="node-part post" id="post-h2">?</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- Outputlager ---------- -->
+        <div id="output-layer" class="layer">
+          <h2 class="layer-title">Utmatningslager</h2>
+          <p class="layer-info">Bevattningen startas om värdet är positivt (&gt;0)</p>
+          <div class="node-stack">
+            <div class="output-wrapper">
+              <div class="output-node" id="output-node">
+                <div class="bias-label bias-output" id="bias-o">?</div>
+                <div id="output-prob">?</div>
+              </div>
+            </div>
+          </div>
+          <div id="prediction-text">Bevattning startas: ?</div>
+        </div>
+
+        <!-- ---------- SVG för linjer ---------- -->
+        <svg id="connections" class="connections-svg"></svg>
       </div>
+    </section>
 
-      <!-- ---------- Dolt lager ---------- -->
-      <div id="hidden-layer" class="layer">
-        <h2 class="layer-title">Dolt lager</h2>
-        <div class="node-stack">
-          <div class="hidden-node" id="hidden0">
-            <div class="bias-label bias-hidden" id="bias-h0">?</div>
-            <div class="node-part pre" id="pre-h0">?</div>
-            <div class="node-part relu">
-              <svg viewBox="0 0 40 40">
-                <path
-                  d="M5 20H20L35 5"
-                  stroke="#fff"
-                  stroke-width="4"
-                  fill="none"
-                />
-              </svg>
+    <section id="calculation-area">
+      <div class="calculation-grid">
+        <div class="calc-group">
+          <h2 class="calc-title">Beräkningar</h2>
+          <div class="calc-controls">
+            <button id="calc-hidden">Beräkna lager</button>
+            <div class="calc-select">
+              <label for="show-ih">Visa kopplingar</label>
+              <select id="show-ih">
+                <option value="none">Ingen</option>
+                <option value="all">Alla</option>
+                <option value="h0">Nod 1</option>
+                <option value="h1">Nod 2</option>
+                <option value="h2">Nod 3</option>
+              </select>
             </div>
-            <div class="node-part post" id="post-h0">?</div>
           </div>
-
-          <div class="hidden-node" id="hidden1">
-            <div class="bias-label bias-hidden" id="bias-h1">?</div>
-            <div class="node-part pre" id="pre-h1">?</div>
-            <div class="node-part relu">
-              <svg viewBox="0 0 40 40">
-                <path
-                  d="M5 20H20L35 5"
-                  stroke="#fff"
-                  stroke-width="4"
-                  fill="none"
-                />
-              </svg>
-            </div>
-            <div class="node-part post" id="post-h1">?</div>
-          </div>
-
-          <div class="hidden-node" id="hidden2">
-            <div class="bias-label bias-hidden" id="bias-h2">?</div>
-            <div class="node-part pre" id="pre-h2">?</div>
-            <div class="node-part relu">
-              <svg viewBox="0 0 40 40">
-                <path
-                  d="M5 20H20L35 5"
-                  stroke="#fff"
-                  stroke-width="4"
-                  fill="none"
-                />
-              </svg>
-            </div>
-            <div class="node-part post" id="post-h2">?</div>
-          </div>
+          <div id="ih-calculation" class="calculation-output"></div>
         </div>
-
-        <div class="controls">
-          <button id="calc-hidden">Beräkna lager</button>
-          <select id="show-ih">
-            <option value="none">Ingen</option>
-            <option value="all">Alla</option>
-            <option value="h0">Nod 1</option>
-            <option value="h1">Nod 2</option>
-            <option value="h2">Nod 3</option>
-          </select>
+        <div class="calc-group calc-group-right">
+          <h2 class="calc-title">Utmaningsnoden</h2>
+          <div class="calc-controls">
+            <button id="calc-output">Beräkna nod</button>
+            <label class="toggle-option"
+              ><input type="checkbox" id="show-ho" /> Visa kopplingar</label
+            >
+            <label class="toggle-option"
+              ><input type="checkbox" id="show-calculations" /> Visa
+              beräkningar</label
+            >
+          </div>
+          <div id="ho-calculation" class="calculation-output"></div>
         </div>
-        <div id="ih-calculation" class="calculation-output"></div>
       </div>
-
-      <!-- ---------- Outputlager ---------- -->
-      <div id="output-layer" class="layer">
-        <h2 class="layer-title">Utmatningslager</h2>
-        <p class="layer-info">Bevattningen startas om värdet är positivt (&gt;0)</p>
-        <div class="node-stack">
-          <div class="output-wrapper">
-            <div class="output-node" id="output-node">
-              <div class="bias-label bias-output" id="bias-o">?</div>
-              <div id="output-prob">?</div>
-            </div>
-          </div>
-        </div>
-        <div id="prediction-text">Bevattning startas: ?</div>
-
-        <div class="controls">
-          <button id="calc-output">Beräkna nod</button>
-          <label style="display: flex; align-items: center; gap: 6px"
-            ><input type="checkbox" id="show-ho" /> Visa kopplingar</label
-          >
-          <label style="display: flex; align-items: center; gap: 6px"
-            ><input type="checkbox" id="show-calculations" /> Visa
-            beräkningar</label
-          >
-        </div>
-        <div id="ho-calculation" class="calculation-output"></div>
-      </div>
-
-      <!-- ---------- SVG för linjer ---------- -->
-      <svg id="connections" class="connections-svg"></svg>
-    </div>
+    </section>
 
     <section id="manual-training-panel">
       <div id="manual-controls" class="manual-controls manual-inactive">
