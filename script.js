@@ -148,8 +148,7 @@ const loadNextBtn = document.getElementById('load-next-example');
 const manualExampleInfo = document.getElementById('manual-example-info');
 const backpropBtn = document.getElementById('backprop-btn');
 const manualFeedback = document.getElementById('manual-feedback');
-const manualStatus = document.getElementById('manual-status');
-const autoStatus = document.getElementById('auto-status');
+const trainingStatusEl = document.getElementById('manual-status');
 const manualTrainingBtn = document.getElementById('manual-training-btn');
 const autoTrainBtn = document.getElementById('auto-train-btn');
 const epochsInput = document.getElementById('epochs-input');
@@ -177,6 +176,8 @@ let manualForwardCache = null;
 let manualAnimating = false;
 let autoRunning = false;
 let autoAnimationEnabled = animateTrainingCheckbox.checked;
+let autoRunWithAnimations = false;
+let autoStopRequested = false;
 const BATCH_SIZE = 1;
 let visibleTable = null;
 
@@ -261,13 +262,17 @@ function highlightLine(lineObj, lineClass, textClass, duration = 800) {
   }, duration);
 }
 
-function updateManualStatus(text) {
-  manualStatus.textContent = text;
+function updateTrainingStatus(text) {
+  trainingStatusEl.textContent = text;
 }
 
 function updateControlStates() {
   manualTrainingBtn.disabled = autoRunning;
-  autoTrainBtn.disabled = manualMode || autoRunning;
+  manualTrainingBtn.classList.toggle('button-muted', autoRunning);
+  const shouldDisableAutoTrain =
+    manualMode || (autoRunning && (!autoRunWithAnimations || autoStopRequested));
+  autoTrainBtn.disabled = shouldDisableAutoTrain;
+  autoTrainBtn.classList.toggle('button-muted', manualMode);
   const loadNextShouldBeDisabled =
     autoRunning || manualAnimating || !manualMode || manualForwardCache !== null;
   loadNextBtn.disabled = loadNextShouldBeDisabled;
@@ -276,6 +281,7 @@ function updateControlStates() {
   backpropBtn.disabled = backpropShouldBeDisabled;
   resetBtn.disabled = autoRunning || manualAnimating;
   epochsInput.disabled = autoRunning;
+  animateTrainingCheckbox.disabled = autoRunning;
   toggleTrainingBtn.disabled = autoRunning || manualAnimating;
   toggleTestBtn.disabled = autoRunning || manualAnimating;
   evaluateTrainingBtn.disabled = autoRunning || manualAnimating;
@@ -653,10 +659,10 @@ function setManualMode(active) {
     showIHSelect.value = 'all';
     toggleHO(true);
     showHOCheckbox.checked = true;
-    manualControls.classList.remove('hidden');
+    manualControls.classList.remove('manual-inactive');
     manualExampleInfo.textContent =
       'Klicka på "Ladda nästa exempel" för att börja den manuella träningen.';
-    updateManualStatus(
+    updateTrainingStatus(
       `Nästa exempel i kön: ${trainingData[manualPointer].id}`
     );
     manualTrainingBtn.textContent = 'Avsluta manuell träning';
@@ -665,9 +671,9 @@ function setManualMode(active) {
     showIHSelect.value = 'all';
     toggleHO(true);
     showHOCheckbox.checked = true;
-    manualControls.classList.add('hidden');
+    manualControls.classList.add('manual-inactive');
     manualExampleInfo.textContent = '';
-    updateManualStatus('');
+    updateTrainingStatus('');
     manualTrainingBtn.textContent = 'Manuell träning';
   }
   updateControlStates();
@@ -682,7 +688,7 @@ async function runManualForward(example) {
   manualExampleInfo.textContent = `Exempel ${example.id}: Jordfuktighet ${
     example.moisture
   } %, temperatur ${example.temperature} °C, mål: ${example.label}.`;
-  updateManualStatus('Laddar indata i nätverket...');
+  updateTrainingStatus('Laddar indata i nätverket...');
 
   document.getElementById('moisture').value = example.moisture;
   document.getElementById('temperature').value = example.temperature;
@@ -707,7 +713,7 @@ async function runManualForward(example) {
     await manualWait(450);
   }
 
-  updateManualStatus('Beräknar utmatningslagret...');
+  updateTrainingStatus('Beräknar utmatningslagret...');
   highlightNode(outputEl);
   highlightBiasLabel(outputBiasEl, 800, 'forward');
   hoLines.forEach((line) =>
@@ -730,7 +736,7 @@ async function runManualForward(example) {
     example
   };
   manualActiveExample = example;
-  updateManualStatus('Klicka på "Bakåtpropagering" för att uppdatera vikterna.');
+  updateTrainingStatus('Klicka på "Bakåtpropagering" för att uppdatera vikterna.');
   manualAnimating = false;
   updateControlStates();
 }
@@ -757,7 +763,7 @@ async function handleBackprop() {
   manualAnimating = true;
   updateControlStates();
   backpropBtn.disabled = true;
-  updateManualStatus('Uppdaterar parametrar med bakåtpropagering...');
+  updateTrainingStatus('Uppdaterar parametrar med bakåtpropagering...');
 
   const snapshot = cloneParams(params);
   const grads = computeGradients(
@@ -799,7 +805,7 @@ async function handleBackprop() {
 
   manualForwardCache = null;
   manualActiveExample = null;
-  updateManualStatus(
+  updateTrainingStatus(
     `Nästa exempel i kön: ${trainingData[manualPointer].id}`
   );
   manualAnimating = false;
@@ -819,14 +825,20 @@ function shuffle(array) {
 async function runAutoTraining() {
   if (autoRunning) return;
   if (manualMode) {
-    autoStatus.textContent = 'Avsluta den manuella träningen innan automatisk start.';
+    updateTrainingStatus('Avsluta den manuella träningen innan automatisk start.');
     return;
   }
   const epochs = Math.max(1, parseInt(epochsInput.value, 10) || 1);
   autoRunning = true;
-  autoTrainBtn.textContent = 'Träning pågår...';
-  autoStatus.textContent = 'Startar automatisk träning...';
-  manualStatus.textContent = '';
+  autoStopRequested = false;
+  autoRunWithAnimations = autoAnimationEnabled;
+  const runWithAnimations = autoRunWithAnimations;
+  autoTrainBtn.textContent = runWithAnimations
+    ? 'Avsluta träning'
+    : 'Träning pågår...';
+  let lastStatus = 'Startar automatisk träning...';
+  let stoppedEarly = false;
+  updateTrainingStatus(lastStatus);
   updateControlStates();
 
   for (let epoch = 1; epoch <= epochs; epoch += 1) {
@@ -841,19 +853,41 @@ async function runAutoTraining() {
       updateWeightLabels();
       epochLossSum += grads.loss * grads.batchSize;
       sampleCount += grads.batchSize;
-      if (autoAnimationEnabled) {
+      if (runWithAnimations) {
         await wait(30);
       }
     }
     const avgLoss = sampleCount ? epochLossSum / sampleCount : 0;
-    autoStatus.textContent = `Epok ${epoch}/${epochs} klar – medelfel: ${round2(
+    const baseMessage = `Epok ${epoch}/${epochs} klar – medelfel: ${round2(
       avgLoss
     )}`;
+    if (autoStopRequested && runWithAnimations && epoch < epochs) {
+      lastStatus = `${baseMessage} – automatisk träning avslutas.`;
+      updateTrainingStatus(lastStatus);
+      stoppedEarly = true;
+      break;
+    }
+    lastStatus = baseMessage;
+    updateTrainingStatus(lastStatus);
+    if (autoStopRequested && runWithAnimations && epoch === epochs) {
+      break;
+    }
   }
 
-  autoStatus.textContent += ' ✓';
+  const stopRequested = autoStopRequested && runWithAnimations;
+  if (stopRequested) {
+    if (!stoppedEarly) {
+      const exitMessage = `${lastStatus} – automatisk träning avslutas.`;
+      updateTrainingStatus(exitMessage);
+    }
+  } else {
+    updateTrainingStatus(`${lastStatus} ✓`);
+  }
+
   autoTrainBtn.textContent = 'Automatisk träning';
   autoRunning = false;
+  autoRunWithAnimations = false;
+  autoStopRequested = false;
   updateControlStates();
 }
 
@@ -889,12 +923,11 @@ function resetNetwork() {
   manualFeedback.textContent = '';
   manualFeedback.classList.remove('result-correct', 'result-wrong');
   manualExampleInfo.textContent = '';
-  manualStatus.textContent = manualMode
-    ? `Nästa exempel i kön: ${trainingData[manualPointer].id}`
-    : '';
+  updateTrainingStatus(
+    manualMode ? `Nästa exempel i kön: ${trainingData[manualPointer].id}` : ''
+  );
   trainingEvaluation.textContent = '';
   testEvaluation.textContent = '';
-  autoStatus.textContent = '';
   resetHiddenDisplays();
   updateBiasLabels();
   updateWeightLabels();
@@ -937,7 +970,19 @@ loadNextBtn.addEventListener('click', handleLoadNextExample);
 
 backpropBtn.addEventListener('click', handleBackprop);
 
-autoTrainBtn.addEventListener('click', runAutoTraining);
+autoTrainBtn.addEventListener('click', () => {
+  if (autoRunning && autoRunWithAnimations && !autoStopRequested) {
+    autoStopRequested = true;
+    const currentText = trainingStatusEl.textContent.trim();
+    const pendingMessage = currentText
+      ? `${currentText} – automatisk träning avslutas efter pågående epok.`
+      : 'Automatisk träning avslutas efter pågående epok.';
+    updateTrainingStatus(pendingMessage);
+    updateControlStates();
+    return;
+  }
+  runAutoTraining();
+});
 
 resetBtn.addEventListener('click', resetNetwork);
 
