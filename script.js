@@ -162,6 +162,10 @@ const testTableContainer = document.getElementById('test-table-container');
 const evaluateTestBtn = document.getElementById('evaluate-test-btn');
 const trainingEvaluation = document.getElementById('training-evaluation');
 const testEvaluation = document.getElementById('test-evaluation');
+const trainingButtonsRow = document.getElementById('training-data-buttons');
+const testButtonsRow = document.getElementById('test-data-buttons');
+const trainingButtonShowText = toggleTrainingBtn.textContent;
+const testButtonShowText = toggleTestBtn.textContent;
 
 const ihLines = [];
 const hoLines = [];
@@ -179,7 +183,6 @@ let autoAnimationEnabled = animateTrainingCheckbox.checked;
 let autoRunWithAnimations = false;
 let autoStopRequested = false;
 const BATCH_SIZE = 1;
-let visibleTable = null;
 
 /***** Utility-funktioner *****/
 const round2 = (x) => Math.round(x * 100) / 100;
@@ -563,6 +566,25 @@ function toggleHO(show) {
   }
 }
 
+/***** Layouthjälp för tabeller *****/
+function updateDataTableWidths() {
+  if (!trainingButtonsRow) return;
+  const rect = trainingButtonsRow.getBoundingClientRect();
+  const width = Math.round(rect.width);
+  if (width > 0) {
+    const widthPx = `${width}px`;
+    trainingTableContainer.style.setProperty('--table-width', widthPx);
+    testTableContainer.style.setProperty('--table-width', widthPx);
+    trainingTableContainer.style.marginLeft = '0px';
+  }
+  if (testButtonsRow) {
+    const testRect = testButtonsRow.getBoundingClientRect();
+    const parentRect = testButtonsRow.parentElement.getBoundingClientRect();
+    const offset = Math.max(0, Math.round(testRect.left - parentRect.left));
+    testTableContainer.style.marginLeft = `${offset}px`;
+  }
+}
+
 /***** UI-tabeller *****/
 function createTableMarkup(data, title) {
   const rows = data
@@ -599,13 +621,17 @@ const tableConfigs = {
     container: trainingTableContainer,
     button: toggleTrainingBtn,
     data: trainingData,
-    title: 'Träning (50 rader)'
+    title: 'Träning (50 rader)',
+    showText: trainingButtonShowText,
+    hideText: trainingButtonShowText.replace('Visa', 'Dölj')
   },
   test: {
     container: testTableContainer,
     button: toggleTestBtn,
     data: testData,
-    title: 'Test (10 rader)'
+    title: 'Test (10 rader)',
+    showText: testButtonShowText,
+    hideText: testButtonShowText.replace('Visa', 'Dölj')
   }
 };
 
@@ -621,27 +647,24 @@ function showTable(type) {
   ensureTableRendered(type);
   const config = tableConfigs[type];
   config.container.classList.remove('hidden');
-  config.button.textContent = config.button.textContent.replace('Visa', 'Dölj');
-  visibleTable = type;
+  config.button.textContent = config.hideText;
+  updateDataTableWidths();
 }
 
 function hideTable(type) {
   const config = tableConfigs[type];
   config.container.classList.add('hidden');
-  config.button.textContent = config.button.textContent.replace('Dölj', 'Visa');
-  if (visibleTable === type) {
-    visibleTable = null;
-  }
+  config.button.textContent = config.showText;
+  updateDataTableWidths();
 }
 
 function toggleTableVisibility(type) {
-  if (visibleTable === type) {
+  const config = tableConfigs[type];
+  if (config.container.classList.contains('hidden')) {
+    showTable(type);
+  } else {
     hideTable(type);
-    return;
   }
-  const otherType = type === 'training' ? 'test' : 'training';
-  hideTable(otherType);
-  showTable(type);
 }
 
 /***** Manuell träning *****/
@@ -828,6 +851,10 @@ async function runAutoTraining() {
     updateTrainingStatus('Avsluta den manuella träningen innan automatisk start.');
     return;
   }
+  showIH('all');
+  showIHSelect.value = 'all';
+  toggleHO(true);
+  showHOCheckbox.checked = true;
   const epochs = Math.max(1, parseInt(epochsInput.value, 10) || 1);
   autoRunning = true;
   autoStopRequested = false;
@@ -1001,6 +1028,7 @@ function refresh() {
     buildConnections();
     updateBiasLabels();
     updateWeightLabels();
+    updateDataTableWidths();
   });
 }
 
