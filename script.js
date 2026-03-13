@@ -619,22 +619,15 @@ function updateIHCalculation() {
     return;
   }
   const idx = Number(currentIHSelection.slice(1));
-  const [rawMoisture, rawTemperature] = getRawInputs();
   const [x0, x1] = getModelInputs();
   const w0 = params.W_IH[0][idx];
   const w1 = params.W_IH[1][idx];
   const bias = params.B_H[idx];
   const sum = x0 * w0 + x1 * w1 + bias;
-  const html = `Rå indata: ${formatCalcSpan(
-    rawMoisture,
-    'calc-input'
-  )}, ${formatCalcSpan(rawTemperature, 'calc-input')}<br/>Normaliserat: ${formatCalcSpan(
+  const html = `${formatCalcSpan(w0, 'calc-weight')} * ${formatCalcSpan(
     x0,
     'calc-input'
-  )}, ${formatCalcSpan(x1, 'calc-input')}<br/>${formatCalcSpan(
-    w0,
-    'calc-weight'
-  )} * ${formatCalcSpan(x0, 'calc-input')} + ${formatCalcSpan(
+  )} + ${formatCalcSpan(
     w1,
     'calc-weight'
   )} * ${formatCalcSpan(x1, 'calc-input')} + ${formatCalcSpan(
