@@ -133,6 +133,8 @@ const inputEls = [
 ];
 const moistureInput = document.getElementById('moisture');
 const temperatureInput = document.getElementById('temperature');
+const moistureNormalizedEl = document.getElementById('moisture-normalized');
+const temperatureNormalizedEl = document.getElementById('temperature-normalized');
 const hiddenEls = [
   document.getElementById('hidden0'),
   document.getElementById('hidden1'),
@@ -205,10 +207,22 @@ function edgeMid(el, side) {
   return { x, y };
 }
 
-function getInputs() {
+function getRawInputs() {
   const moisture = parseFloat(moistureInput.value) || 0;
   const temperature = parseFloat(temperatureInput.value) || 0;
   return [moisture, temperature];
+}
+
+function getModelInputs() {
+  return normalizeInputs(getRawInputs());
+}
+
+function updateNormalizedInputDisplay() {
+  const [moistureNorm, temperatureNorm] = getModelInputs();
+  if (moistureNormalizedEl) moistureNormalizedEl.textContent = round2(moistureNorm);
+  if (temperatureNormalizedEl) {
+    temperatureNormalizedEl.textContent = round2(temperatureNorm);
+  }
 }
 
 function resetHiddenDisplays() {
@@ -326,10 +340,6 @@ function forwardPassModel(rawX, p = params) {
   return { ...forward, modelInputs, rawInputs: rawX };
 }
 
-function forwardPassDisplay(rawX, p = params) {
-  const forward = forwardPassCore(rawX, p);
-  return { ...forward, modelInputs: rawX, rawInputs: rawX };
-}
 
 function computeGradients(forward, x, target, p = params) {
   const grads = {
@@ -401,12 +411,22 @@ function applyGradients(grads, lr) {
 
 function alignInputNodes() {
   if (!hiddenEls.length || inputEls.length < 2) return;
-  const topTarget = edgeMid(hiddenEls[0], 'left').y;
-  const bottomTarget = edgeMid(hiddenEls[hiddenEls.length - 1], 'left').y;
-  const currentTop = edgeMid(inputEls[0], 'right').y;
-  const currentBottom = edgeMid(inputEls[inputEls.length - 1], 'right').y;
-  inputEls[0].style.transform = `translateY(${topTarget - currentTop}px)`;
-  inputEls[1].style.transform = `translateY(${bottomTarget - currentBottom}px)`;
+  const inputStack = document.querySelector('#input-layer .node-stack');
+  if (!inputStack) return;
+
+  inputEls.forEach((el) => {
+    el.style.transform = 'none';
+  });
+  inputStack.style.transform = 'none';
+
+  const hiddenTop = edgeMid(hiddenEls[0], 'left').y;
+  const hiddenBottom = edgeMid(hiddenEls[hiddenEls.length - 1], 'left').y;
+  const inputTop = edgeMid(inputEls[0], 'right').y;
+  const inputBottom = edgeMid(inputEls[inputEls.length - 1], 'right').y;
+
+  const targetCenter = (hiddenTop + hiddenBottom) / 2;
+  const currentCenter = (inputTop + inputBottom) / 2;
+  inputStack.style.transform = `translateY(${targetCenter - currentCenter}px)`;
 }
 
 function makeLine(x1, y1, x2, y2, label, options = {}) {
@@ -599,21 +619,28 @@ function updateIHCalculation() {
     return;
   }
   const idx = Number(currentIHSelection.slice(1));
-  const [x0, x1] = getInputs();
+  const [rawMoisture, rawTemperature] = getRawInputs();
+  const [x0, x1] = getModelInputs();
   const w0 = params.W_IH[0][idx];
   const w1 = params.W_IH[1][idx];
   const bias = params.B_H[idx];
   const sum = x0 * w0 + x1 * w1 + bias;
-  const html = `${formatCalcSpan(w0, 'calc-weight')} * ${formatCalcSpan(
+  const html = `Rå indata: ${formatCalcSpan(
+    rawMoisture,
+    'calc-input'
+  )}, ${formatCalcSpan(rawTemperature, 'calc-input')}<br/>Normaliserat: ${formatCalcSpan(
     x0,
     'calc-input'
-  )} + ${formatCalcSpan(w1, 'calc-weight')} * ${formatCalcSpan(
-    x1,
-    'calc-input'
-  )} + ${formatCalcSpan(bias, 'calc-bias-hidden')} = ${formatCalcSpan(
-    sum,
-    'calc-result-hidden'
-  )}`;
+  )}, ${formatCalcSpan(x1, 'calc-input')}<br/>${formatCalcSpan(
+    w0,
+    'calc-weight'
+  )} * ${formatCalcSpan(x0, 'calc-input')} + ${formatCalcSpan(
+    w1,
+    'calc-weight'
+  )} * ${formatCalcSpan(x1, 'calc-input')} + ${formatCalcSpan(
+    bias,
+    'calc-bias-hidden'
+  )} = ${formatCalcSpan(sum, 'calc-result-hidden')}`;
   showCalculation(ihCalculationEl, html);
   showOverlayCalculation(hiddenCalcOverlay, html);
 }
@@ -625,7 +652,7 @@ function updateHOCalculation() {
     hideOverlayCalculation(outputCalcOverlay);
     return;
   }
-  const forward = forwardPassDisplay(getInputs());
+  const forward = forwardPassCore(getModelInputs());
   const bias = params.B_O;
   const parts = forward.actHidden.map((value, idx) =>
     `${formatCalcSpan(params.W_HO[idx], 'calc-weight')} * ${formatCalcSpan(
@@ -858,14 +885,14 @@ async function runManualForward(example) {
 
   document.getElementById('moisture').value = example.moisture;
   document.getElementById('temperature').value = example.temperature;
+  updateNormalizedInputDisplay();
 
   inputEls.forEach((el) => highlightNode(el));
   await manualWait(500);
 
   const x = [example.moisture, example.temperature];
-  const displayForward = forwardPassDisplay(x);
   const modelForward = forwardPassModel(x);
-  hiddenOut = displayForward.actHidden.slice();
+  hiddenOut = modelForward.actHidden.slice();
 
   resetHiddenDisplays();
 
@@ -875,7 +902,7 @@ async function runManualForward(example) {
     ihLines
       .filter((line) => line.to === j)
       .forEach((line) => highlightLine(line, 'svg-forward', 'svg-forward-text'));
-    setHiddenCell(j, displayForward.preHidden[j], displayForward.actHidden[j]);
+    setHiddenCell(j, modelForward.preHidden[j], modelForward.actHidden[j]);
     await manualWait(450);
   }
 
@@ -885,10 +912,10 @@ async function runManualForward(example) {
   hoLines.forEach((line) =>
     highlightLine(line, 'svg-forward', 'svg-forward-text')
   );
-  updatePrediction(displayForward.actHidden);
+  updatePrediction(modelForward.actHidden);
   await manualWait(350);
 
-  const predictedDisplay = LABEL_FROM_OUTPUT(displayForward.output);
+  const predictedDisplay = LABEL_FROM_OUTPUT(modelForward.output);
   const target = example.label;
   manualFeedback.textContent =
     predictedDisplay === target
@@ -899,7 +926,6 @@ async function runManualForward(example) {
   );
   manualForwardCache = {
     forward: modelForward,
-    display: displayForward,
     example
   };
   manualActiveExample = example;
@@ -1102,27 +1128,26 @@ function resetNetwork() {
   resetHiddenDisplays();
   updateBiasLabels();
   updateWeightLabels();
+  updateNormalizedInputDisplay();
 }
 
 /***** Event listeners *****/
 document.getElementById('calc-hidden').addEventListener('click', () => {
-  const x = getInputs();
-  const displayForward = forwardPassDisplay(x);
-  hiddenOut = displayForward.actHidden.slice();
-  displayForward.preHidden.forEach((pre, idx) => {
-    setHiddenCell(idx, pre, displayForward.actHidden[idx]);
+  const forward = forwardPassCore(getModelInputs());
+  hiddenOut = forward.actHidden.slice();
+  forward.preHidden.forEach((pre, idx) => {
+    setHiddenCell(idx, pre, forward.actHidden[idx]);
   });
   updateAllCalculations();
 });
 
 document.getElementById('calc-output').addEventListener('click', () => {
-  const x = getInputs();
-  const displayForward = forwardPassDisplay(x);
-  hiddenOut = displayForward.actHidden.slice();
-  displayForward.preHidden.forEach((pre, idx) => {
-    setHiddenCell(idx, pre, displayForward.actHidden[idx]);
+  const forward = forwardPassCore(getModelInputs());
+  hiddenOut = forward.actHidden.slice();
+  forward.preHidden.forEach((pre, idx) => {
+    setHiddenCell(idx, pre, forward.actHidden[idx]);
   });
-  updatePrediction(displayForward.actHidden);
+  updatePrediction(forward.actHidden);
   updateAllCalculations();
 });
 
@@ -1136,7 +1161,10 @@ showHOCheckbox.addEventListener('change', (e) => toggleHO(e.target.checked));
 showCalculationsCheckbox.addEventListener('change', () => updateHOCalculation());
 
 [moistureInput, temperatureInput].forEach((input) =>
-  input.addEventListener('input', updateAllCalculations)
+  input.addEventListener('input', () => {
+    updateNormalizedInputDisplay();
+    updateAllCalculations();
+  })
 );
 
 manualTrainingBtn.addEventListener('click', () => {
@@ -1187,6 +1215,7 @@ function refresh() {
 window.addEventListener('load', () => {
   refresh();
   resetHiddenDisplays();
+  updateNormalizedInputDisplay();
   updateControlStates();
 });
 window.addEventListener('resize', refresh);
