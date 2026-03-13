@@ -16,16 +16,24 @@
           <h2 class="layer-title">Inmatningslager</h2>
           <div class="node-stack">
             <div class="input-node" id="input0">
-              <label
-                >Jordfuktighet (%)
+              <div class="input-node-part input-raw">
+                <label for="moisture">Jordfuktighet (%)</label>
                 <input type="number" id="moisture" value="30" step="1" />
-              </label>
+              </div>
+              <div class="input-node-part input-normalized">
+                <div class="normalized-title">Normaliserat</div>
+                <div class="normalized-value" id="moisture-normalized">?</div>
+              </div>
             </div>
             <div class="input-node" id="input1">
-              <label
-                >Lufttemperatur (°C)
+              <div class="input-node-part input-raw">
+                <label for="temperature">Lufttemperatur (°C)</label>
                 <input type="number" id="temperature" value="20" step="1" />
-              </label>
+              </div>
+              <div class="input-node-part input-normalized">
+                <div class="normalized-title">Normaliserat</div>
+                <div class="normalized-value" id="temperature-normalized">?</div>
+              </div>
             </div>
           </div>
         </div>
